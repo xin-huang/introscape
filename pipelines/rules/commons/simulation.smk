@@ -1,3 +1,55 @@
+import numpy as np
+
+feature_id = config["feature_id"]
+feature_config = config["feature_config"]
+nfeature = config["nfeature"]
+nref = config["nref"]
+ntgt = config["ntgt"]
+ploidy = config["ploidy"]
+geno_state_list = config["geno_states"]
+output_prefix = config["output_prefix"]
+win_step = config["win_step"]
+cutoff_num = config["cutoff_num"]
+cutoff_list = np.round(np.linspace(0, 1, cutoff_num, endpoint=False), 2)
+cutoff_list = np.append(cutoff_list, [0.99, 0.999])
+
+nrep = {}
+seq_len = {}
+demog_id = {}
+demes = {}
+mut_rate = {}
+rec_rate = {}
+ref_id = {}
+tgt_id = {}
+src_id = {}
+seed_list = {}
+output_dir = {}
+
+for k in ["train", "test"]:
+    np.random.seed(config["seed"])
+    nrep[k] = config["nrep"][k]
+    seq_len[k] = config["seq_len"][k]
+    demog_id[k] = config["demog_id"][k]
+    demes[k] = config["demes"][k]
+    mut_rate[k] = config["mut_rate"][k]
+    rec_rate[k] = config["rec_rate"][k]
+    ref_id[k] = config["ref_id"][k]
+    tgt_id[k] = config["tgt_id"][k]
+    src_id[k] = config["src_id"][k]
+    seed_list[k] = np.random.randint(1, 2**31, nrep[k])
+    output_dir[k] = f"results/data/{k}/{demog_id[k]}/nref_{nref}/ntgt_{ntgt}"
+
+test_seed = seed_list["test"]
+output_dir = output_dir["test"]
+
+rule all:
+    input:
+        expand(output_dir + "/{seed}/{output_prefix}.phased.true.tracts.bed",
+               output_prefix=output_prefix, seed=test_seed),
+        expand(output_dir + "/{seed}/{output_prefix}.vcf.gz",
+               output_prefix=output_prefix, seed=test_seed),
+
+
 rule simulate_test_data:
     input:
         demes_file = demes["test"],
@@ -19,7 +71,7 @@ rule simulate_test_data:
         tgt_id = tgt_id["test"],
         src_id = src_id["test"],
     script:
-        "../scripts/simulation.py"
+        "../../scripts/simulation.py"
 
 
 rule compress_vcf:
@@ -52,8 +104,8 @@ rule get_phased_true_tracts:
         src_id = src_id["test"],
     resources:
         partition = "himem", 
-        time = 60, 
-        mem_gb = 2000, 
+        time = 60,
+        mem_gb = 2000,
         cpus = 128,
     run:
         import tskit
@@ -128,4 +180,4 @@ rule get_unphased_true_tracts:
     resources:
         partition = "himem,gpu",
     script:
-        "../scripts/get_unphased_true_tracts.py"
+        "../../scripts/get_unphased_true_tracts.py"
