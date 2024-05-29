@@ -1,5 +1,6 @@
 logs/*
 results*
 .snakemake/*
+*__pycache__*
 submit.sh
 *.out
