@@ -27,7 +27,7 @@ cutoff_list = np.append(cutoff_list, [0.99, 0.999])
 
 output_prefix = config["output_prefix"]
 nrep = config["nrep"][params_set]
-seq_len = config["seq_len"]
+seq_len = config["seq_len"][params_set]
 demog_id = config["demog_id"][params_set]
 demes_file = config["demes"][params_set]
 mut_rate = config["mut_rate"][params_set]
@@ -40,6 +40,12 @@ src_id = config["src_id"][params_set]
 
 np.random.seed(config["seed"])
 seed_list = np.random.random_integers(1, 2**31, nrep)
+
+#if binary==True in config file, do simulations with binary mutation model
+try:
+    binary = config["binary"]
+except KeyError:
+    binary = False
 
 #output_dir = output_dir + f'/{demog_id}/nref_{nref}/ntgt_{ntgt}'
 output_dir = f'results/data/{params_set}/{demog_id}/nref_{nref}/ntgt_{ntgt}'
@@ -81,6 +87,32 @@ def tree_batch_processing(args):
                 if t.is_descendant(n, m.node):
                     left = m.left if m.left > t.interval.left else t.interval.left
                     right = m.right if m.right < t.interval.right else t.interval.right
+
+                    bed_list.append([1, int(left), int(right), f'tsk_{ts.node(n).individual}_{int(n%ploidy+1)}'])
+
+    return True
+
+
+def migration_batch_processing(args):
+
+    tree_object, migration_batches, migration_tree_object, bed_list, tgt_id = args
+
+    ts = tree_object.value
+
+    migration_ts = migration_tree_object.value
+    for migration_index in migration_batches:
+        m = migration_ts.migrations()[migration_index]
+        # Tree-sequences are sorted by the left ends of the intervals
+        # Can skip those tree-sequences are not overlapped with the interval of i.
+        for t in ts.trees():
+
+            if m.left >= t.interval.right: continue
+            if m.right <= t.interval.left: break # [l, r)
+            for n in ts.samples(tgt_id):
+                if t.is_descendant(n, m.node):
+                    left = m.left if m.left > t.interval.left else t.interval.left
+                    right = m.right if m.right < t.interval.right else t.interval.right
+
 
                     bed_list.append([1, int(left), int(right), f'tsk_{ts.node(n).individual}_{int(n%ploidy+1)}'])
 
@@ -161,9 +193,19 @@ rule simulate_data:
             record_migrations=True,
             random_seed=wildcards.seed,
         )
-        ts = msprime.sim_mutations(ts, rate=mut_rate, random_seed=wildcards.seed, model=msprime.BinaryMutationModel())
+
+        if binary:
+            ts = msprime.sim_mutations(ts, rate=mut_rate, random_seed=wildcards.seed, model=msprime.BinaryMutationModel())
+        else:
+            ts = msprime.sim_mutations(ts, rate=mut_rate, random_seed=wildcards.seed)
+
         ts.dump(output.ts)
         with open(output.vcf, 'w') as o: ts.write_vcf(o)
+
+        if not binary:
+            new_vcf = output_dir + f"/{wildcards.seed}/{output_prefix}.vcf.recode.vcf"
+            shell("vcftools --vcf {output.vcf} --min-alleles 2 --max-alleles 2 --recode --out {output.vcf}")
+            shell("mv {new_vcf} {output.vcf}")
 
         with open(output.ref, 'w') as f:
             for i in range(nref):

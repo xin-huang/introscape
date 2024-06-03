@@ -26,7 +26,7 @@ cutoff_list = np.append(cutoff_list, [0.99, 0.999])
 
 output_prefix = config["output_prefix"]
 nrep = config["nrep"][params_set]
-seq_len = config["seq_len"]
+seq_len = config["seq_len"][params_set]
 demog_id = config["demog_id"][params_set]
 demes_file = config["demes"][params_set]
 mut_rate = config["mut_rate"][params_set]
@@ -35,6 +35,12 @@ ploidy = config["ploidy"]
 ref_id = config["ref_id"][params_set]
 tgt_id = config["tgt_id"][params_set]
 src_id = config["src_id"][params_set]
+
+#if binary==True in config file, do simulations with binary mutation model
+try:
+    binary = config["binary"]
+except KeyError:
+    binary = False
 
 
 np.random.seed(config["seed"])
@@ -159,9 +165,20 @@ rule simulate_data:
             record_migrations=True,
             random_seed=wildcards.seed,
         )
-        ts = msprime.sim_mutations(ts, rate=mut_rate, random_seed=wildcards.seed, model=msprime.BinaryMutationModel())
+
+        if binary:
+            ts = msprime.sim_mutations(ts, rate=mut_rate, random_seed=wildcards.seed, model=msprime.BinaryMutationModel())
+        else:
+            ts = msprime.sim_mutations(ts, rate=mut_rate, random_seed=wildcards.seed)
+
         ts.dump(output.ts)
         with open(output.vcf, 'w') as o: ts.write_vcf(o)
+
+        if not binary:
+            new_vcf = output_dir + f"/{wildcards.seed}/{output_prefix}.vcf.recode.vcf"
+            #new_vcf = output_dir +output_prefix + "vcf.recode.vcf"
+            shell("vcftools --vcf {output.vcf} --min-alleles 2 --max-alleles 2 --recode --out {output.vcf}")
+            shell("mv {new_vcf} {output.vcf}")
 
         with open(output.ref, 'w') as f:
             for i in range(nref):

@@ -2,16 +2,16 @@ import os
 import numpy as np
 import pandas as pd
 from collections import defaultdict
+import pybedtools
+
+
 from helper_functions import sortby, Make_folder_if_not_exists, load_fasta, convert_to_bases, clean_files
 
-from hmm_functions import TrainModel, DecodeModel, HMMParam, read_HMM_parameters_from_file
 from hmm_functions import HMMParam, get_default_HMM_parameters, write_HMM_to_file
 from make_test_data import create_test_data
 from hmm_functions import TrainModel, DecodeModel, HMMParam, read_HMM_parameters_from_file
 from helper_functions import *
 #from helper_functions import Load_observations_weights_mutrates
-
-ref_set = ["0", "1"]
 
 
 def Write_Decoded_output(outputprefix, segments, obs_file = None, admixpop_file = None, extrainfo = False):
@@ -348,8 +348,6 @@ def make_ingroup_custom_mut(ingroup_individuals, bedfile, vcffiles, outprefix, o
                     for original_genotype, individual in zip(genotypes, individuals_in_vcffile):
                         genotype = convert_to_bases_set(original_genotype, all_bases, ref_set)
 
-                        #print("both genotypes")
-                        #print(genotype)
 
                         if ancestralfile is not None:
                             # With ancestral information look for derived alleles
@@ -475,15 +473,62 @@ def make_out_group_custom_mut(individuals_input, bedfile, vcffiles, outputfile, 
 
 
 
-def process_output(segments_df, out_file_prefix, src_id, cutoff_list=[0.5]):
+def cal_accuracy(true_tracts, inferred_tracts):
+    """
+    Description:
+        Helper function for calculating accuracy.
+
+    Arguments:
+        true_tracts str: Name of the BED file containing true introgresssed tracts.
+        inferred_tracts str: Name of the BED file containing inferred introgressed tracts.
+
+    Returns:
+        precision float: Amount of true introgressed tracts detected divided by amount of inferred introgressed tracts.
+        recall float: Amount ot true introgressed tracts detected divided by amount of true introgressed tracts.
+    """
+    print("show files")
+    print(true_tracts)
+    print(inferred_tracts)
+
+
+    try:
+        truth_tracts = pybedtools.BedTool(true_tracts).sort().merge()
+        inferred_tracts =  pybedtools.BedTool(inferred_tracts).sort().merge()
+
+        total_inferred_tracts = sum([x.stop - x.start for x in (inferred_tracts)])
+        total_true_tracts =  sum([x.stop - x.start for x in (truth_tracts)])
+        true_positives = sum([x.stop - x.start for x in inferred_tracts.intersect(truth_tracts)])
+
+        if float(total_inferred_tracts) == 0: precision = np.nan
+        else: precision = true_positives / float(total_inferred_tracts) * 100
+        if float(total_true_tracts) == 0: recall = np.nan
+        else: recall = true_positives / float(total_true_tracts) * 100
+
+        return precision, recall
+
+    except:
+        return 0, 0
+
+
+
+def process_output(segments_df, outfolder, out_file_prefix, src_id, cutoff_list=[0.01, 0.25, 0.5, 0.75, 0.99], return_filenames=False):
     segments_df.loc[segments_df['state'] != src_id, 'mean_prob'] = 1 - segments_df.loc[segments_df['state'] != src_id, 'mean_prob']
-    print(segments_df)
+
+    if return_filenames:
+        filenames = []
 
     for cutoff in cutoff_list:
         cutoff_df = segments_df.copy()
         cutoff_df = cutoff_df.drop('state', axis=1)
-        cutoff_df = cutoff_df[cutoff_df[src_id] > cutoff]
+        cutoff_df = cutoff_df[cutoff_df['mean_prob'] > cutoff]
 
         cols = ['chrom', 'start', 'end', 'sample']
 
-        cutoff_df.to_csv(out_file_prefix + str(cutoff) + ".txt", columns=cols, sep="\t", header=False, index=False)
+        new_file = os.path.join(outfolder, out_file_prefix + str(cutoff) + ".bed")
+        cutoff_df.to_csv(new_file, columns=cols, sep="\t", header=False, index=False)
+
+        if return_filenames:
+            filenames.append([cutoff, new_file])
+
+    if return_filenames:
+        return filenames

@@ -125,6 +125,9 @@ rule ms2vcf:
         ms = rules.simulate_glm_data.output.ms,
     output:
         vcf = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sim1src.vcf",
+        #create lists for sstar simulations
+        ss_ref = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sstarsim.ref.ind.list",
+        ss_tgt = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sstarsim.tgt.ind.list",
 
     params:
         nsamp = lambda wildcards: 2*(int(1)+int(wildcards.ntgt)),
@@ -133,14 +136,16 @@ rule ms2vcf:
     resources: time_min=60, mem_mb=5000, cpus=1,
     threads: 1,
     run:
-        ms2vcf(input.ms, output.vcf, params.nsamp, params.seq_len)
+        ms2vcf_create_ind_lists(input.ms, output.vcf, params.nsamp, params.seq_len, output.ss_ref, output.ss_tgt, ind_prefix="tsk_")
 
 
 rule cal_score:
     input:
         vcf = rules.ms2vcf.output.vcf,
-        ref_list = output_dir + "/" + str(seed_list[0]) + "/" + output_prefix + ".ref.ind.list",
-        tgt_list = output_dir + "/" + str(seed_list[0]) + "/" + output_prefix + ".tgt.ind.list",
+        #ref_list = output_dir + "/" + str(seed_list[0]) + "/" + output_prefix + ".ref.ind.list",
+        #tgt_list = output_dir + "/" + str(seed_list[0]) + "/" + output_prefix + ".tgt.ind.list",
+        ref_list = rules.ms2vcf.output.ss_ref,
+        tgt_list = rules.ms2vcf.output.ss_tgt,
     output:
         score = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sim1src.sstar.scores",
     params:

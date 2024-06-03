@@ -8,6 +8,9 @@ from sprime_additional_functions import *
 #configfile for sprime
 configfile: "config/sprime/config_sprime.yaml"
 
+binary_model = False
+only_biallelic = True
+
 params_set = "test"
 
 feature_id = config["feature_id"]
@@ -24,7 +27,7 @@ cutoff_list = np.append(cutoff_list, [0.99, 0.999])
 
 output_prefix = config["output_prefix"]
 nrep = config["nrep"][params_set]
-seq_len = config["seq_len"]
+seq_len = config["seq_len"][params_set]
 demog_id = config["demog_id"][params_set]
 demes_file = config["demes"][params_set]
 mut_rate = config["mut_rate"][params_set]

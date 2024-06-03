@@ -34,7 +34,7 @@ cutoff_list = np.append(cutoff_list, [0.99, 0.999])
 
 output_prefix = config["output_prefix"]
 nrep = config["nrep"][params_set]
-seq_len = config["seq_len"]
+seq_len = config["seq_len"][params_set]
 demog_id = config["demog_id"][params_set]
 demes_file = config["demes"][params_set]
 mut_rate = config["mut_rate"][params_set]
@@ -43,6 +43,17 @@ ploidy = config["ploidy"]
 ref_id = config["ref_id"][params_set]
 tgt_id = config["tgt_id"][params_set]
 src_id = config["src_id"][params_set]
+
+#if binary==True in config file, do simulations with binary mutation model
+try:
+    binary = config["binary"]
+except KeyError:
+    binary = False
+
+if binary:
+    ref_set = ["0", "1"]
+else:
+    ref_set = ["A", "C", "G", "T"]
 
 
 np.random.seed(config["seed"])
@@ -56,19 +67,18 @@ skov_output_dir = f'results/SkovHMM/{params_set}/{demog_id}/nref_{nref}/ntgt_{nt
 
 rule all:
     input:
-        expand(skov_output_dir + "/{seed}/output_ref_vs.txt", demog=demog_id, nref=nref, ntgt=ntgt, seed = seed_list)
+        expand(skov_output_dir + "/{seed}/output_ref_vs.txt", demog_id=demog_id, nref=nref, ntgt=ntgt, seed = seed_list)
 
 
 rule process_test_data:
     input:
         vcf = output_dir + "/{seed}/" + output_prefix + ".vcf.gz",
         ref_list = output_dir + "/{seed}/" + output_prefix + ".ref.ind.list",
-        tgt_list = output_dir + "/{seed}/" + output_prefix + ".tgt.ind.list"
-
+        tgt_list = output_dir + "/{seed}/" + output_prefix + ".tgt.ind.list",
+        true_tracts = output_dir + "/{seed}/" + output_prefix + ".truth.tracts.bed",
     output:
         outgroup_file = skov_output_dir + "/{seed}/output_ref_vs.txt",
         prob_file = skov_output_dir + "/{seed}/probabilities.txt",
-        out_folder = directory(skov_output_dir + "/{seed}/")
     resources:
         partition = "basic",
         mem_gb = 32,
@@ -84,29 +94,34 @@ rule process_test_data:
 
         ref_lines_comma = ','.join([line.strip() for line in ref_lines])
 
-        with open(os.path.join(output.out_folder,'comma_separated_refinds.txt'), 'w') as output_file:
+        out_folder = os.path.join(skov_output_dir, wildcards.seed)
+        with open(os.path.join(out_folder,'comma_separated_refinds.txt'), 'w') as output_file:
             output_file.write(ref_lines_comma)
 
         comma_separated = [line.strip() for line in ref_lines]
         comma_separated_tgt = [line.strip() for line in tgt_lines]
 
-        make_out_group_custom_mut(comma_separated, None, [input.vcf], output.outgroup_file, [None], [None])
-        make_ingroup_custom_mut(comma_separated_tgt, None, [input.vcf], os.path.join(output.out_folder , "output_tgt_vs"),  output.outgroup_file, [None])
+        make_out_group_custom_mut(comma_separated, None, [input.vcf], output.outgroup_file, [None], [None], ref_set=ref_set)
+        make_ingroup_custom_mut(comma_separated_tgt, None, [input.vcf], os.path.join(out_folder , "output_tgt_vs"),  output.outgroup_file, [None], ref_set=ref_set)
 
-        make_mutation_rate(output.outgroup_file , os.path.join(output.out_folder, "mutrates_outgroup1.out"), None, 100000)
+        make_mutation_rate(output.outgroup_file , os.path.join(out_folder, "mutrates_outgroup1.out"), None, 100000)
         new_HMM = HMMParam([ref_id, src_id], [0.5, 0.5], [[0.99,0.01],[0.02,0.98]], [0.03, 0.3])
-        write_HMM_to_file(new_HMM, os.path.join(output.out_folder,'hmm_guesses.json'))
+        write_HMM_to_file(new_HMM, os.path.join(out_folder,'hmm_guesses.json'))
 
-        infiles, trained_files = train_hmm_individuals(comma_separated_tgt,  os.path.join(output.out_folder,'hmm_guesses.json'), os.path.join(output.out_folder, "mutrates_outgroup1.out"), out_folder=output.out_folder, window_size=1000, haploid=False, weights=None)
+        infiles, trained_files = train_hmm_individuals(comma_separated_tgt,  os.path.join(out_folder,'hmm_guesses.json'), os.path.join(out_folder, "mutrates_outgroup1.out"), out_folder=out_folder, window_size=1000, haploid=False, weights=None)
 
-        all_segments = decode_hmm_individuals(comma_separated_tgt, trained_files, os.path.join(output.out_folder, "mutrates_outgroup1.out"),  out_folder=output.out_folder, window_size=1000, haploid=False, weights=None)
+        all_segments = decode_hmm_individuals(comma_separated_tgt, trained_files, os.path.join(out_folder, "mutrates_outgroup1.out"),  out_folder=out_folder, window_size=1000, haploid=False, weights=None)
 
-        all_segments.to_csv(output.prob_file)
+        all_segments.to_csv(output.prob_file, index=False)
 
-#rule process_output_files:
-#    input:
-#        prob_file = skov_output_dir + "/{seed}/probabilities.txt",
+        inferred_tract_files = process_output(all_segments, out_folder, output_prefix, src_id, cutoff_list=cutoff_list, return_filenames=True)
 
+        for inferred_tracts in inferred_tract_files:
+            precision, recall = cal_accuracy(input.true_tracts, inferred_tracts[1])
+            cutoff = inferred_tracts[0]
 
+            prec_rec_file = inferred_tracts[1].rsplit('.', 1)[0] + ".accuracy"
 
+            with open(prec_rec_file, 'w') as o:
+                o.write(f'{demog_id}\tnref_{nref}_ntgt_{ntgt}\t{cutoff}\t{precision}\t{recall}\n')
 
