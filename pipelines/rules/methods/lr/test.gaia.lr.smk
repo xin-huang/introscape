@@ -129,9 +129,9 @@ rule summary:
             cutoff=cutoff_list
         ),
     output:
-        summary = "results/performance/{output_prefix}.performance.summary",
+        summary = "results/performance/{train_{train_demog}_test_{test_demog}/{output_prefix}.performance.summary",
     log:
-        "logs/summary/{output_prefix}.log",
+        "logs/summary/train_{train_demog}_test_{test_demog}/{output_prefix}.log",
     resources:
         partition = "himem,gpu",
         mem_gb = 32,

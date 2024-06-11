@@ -55,13 +55,14 @@ performance_dir = f"results/performance/train_{train_demog}_test_{test_demog}"
 
 rule all:
     input:
-        expand("results/plots/{output_prefix}.performance.pdf", output_prefix=output_prefix),
+        expand("results/plots/train_{train_demog}_test_{test_demog}/{output_prefix}.performance.pdf", 
+               train_demog=train_demog, test_demog=test_demog, output_prefix=output_prefix),
 
 
 ##### Modules #####
 
 
-include: "rules/commons/simulation.smk"
-include: "rules/methods/lr/train.gaia.lr.smk"
-include: "rules/methods/lr/test.gaia.lr.smk"
-include: "rules/commons/plot.smk"
+include: "../rules/commons/simulation.smk"
+include: "../rules/methods/lr/train.gaia.lr.smk"
+include: "../rules/methods/lr/test.gaia.lr.smk"
+include: "../rules/commons/plot.smk"
