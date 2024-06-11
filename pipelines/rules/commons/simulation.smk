@@ -19,7 +19,7 @@ rule simulate_test_data:
         tgt_id = tgt_id["test"],
         src_id = src_id["test"],
     script:
-        "../../scripts/simulation.py"
+        "../scripts/simulation.py"
 
 
 rule compress_vcf:
@@ -170,4 +170,4 @@ rule get_unphased_true_tracts:
     resources:
         partition = "himem,gpu",
     script:
-        "../../scripts/get_unphased_true_tracts.py"
+        "../scripts/get_unphased_true_tracts.py"
