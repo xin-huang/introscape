@@ -61,7 +61,7 @@ rule all:
 ##### Modules #####
 
 
-include: "../rules/commons/simulation.smk"
-include: "../rules/methods/lr/train.gaia.lr.smk"
-include: "../rules/methods/lr/test.gaia.lr.smk"
-include: "../rules/commons/plot.smk"
+include: "rules/commons/simulation.smk"
+include: "rules/methods/lr/train.gaia.lr.smk"
+include: "rules/methods/lr/test.gaia.lr.smk"
+include: "rules/commons/plot.smk"
