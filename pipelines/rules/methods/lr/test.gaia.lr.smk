@@ -26,6 +26,8 @@ rule process_test_data:
         mem_gb = 128,
         cpus = 16,
         time = 360,
+    conda:
+        "../../../envs/gaia-env.yaml",
     shell:
         """
         gaia lr preprocess --vcf {input.vcf} --ref {input.ref} --tgt {input.tgt} --feature-config {input.feature_config} \
@@ -57,6 +59,8 @@ rule test_logistic_regression_model:
     resources:
         partition = "himem",
         mem_gb = 128,
+    conda:
+        "../../../envs/gaia-env.yaml",
     shell:
         """
         gaia lr infer --inference-data {input.features} --model-file {input.model_file} --output-file {params.pred}
@@ -97,6 +101,8 @@ rule evaluate_logistic_regression_model:
         "train_{train_seed}_test_{test_seed}/{output_prefix}.{cutoff}.log",
     resources:
         partition = "himem,gpu",
+    conda:
+        "../../../envs/gaia-env.yaml",
     shell:
         """
         zcat {input.pred} | sed '1d' | awk '$NF>{wildcards.cutoff}' | awk 'BEGIN{{OFS="\\t"}}{{print $1,$2,$3,$4}}' > {output.inferred_tracts} 2>> {log}
@@ -135,6 +141,8 @@ rule summary:
     resources:
         partition = "himem,gpu",
         mem_gb = 32,
+    conda:
+        "../../../envs/gaia-env.yaml",
     shell:
         """
         cat {input.summaries} | sed '1iTraining Data Demography\\tTest Data Demography\\tGenotype\\tData balance\\tNref\\tNtgt\\tTraining Seed\\tTest Seed\\tFeature\\tCutoff\\tSequence_length\\tTrue_tracts_length\\tInferred_tracts_length\\tTrue_positives_length\\tFalse_positives_length\\tTrue_negatives_length\\tFalse_negatives_length' > {output.summary} 2>> {log}

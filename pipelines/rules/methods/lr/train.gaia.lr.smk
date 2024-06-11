@@ -30,6 +30,8 @@ rule simulate_training_data:
         mem_gb = 512,
         time = 4320,
         partition = "himem",
+    conda:
+        "../../../envs/gaia-env.yaml",
     shell:
         """
         gaia lr simulate --demes {input.demes_file} --nref {params.nref} --ntgt {params.ntgt} \
@@ -56,6 +58,8 @@ rule train_logistic_regression_model:
     resources:
         partition = "himem,gpu", 
         mem_gb = 32,
+    conda:
+        "../../../envs/gaia-env.yaml",
     shell:
         """
         gaia lr train --training-data {input.features} --model-file {output.model_file} --seed {wildcards.train_seed} 2>> {log}

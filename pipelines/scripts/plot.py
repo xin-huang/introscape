@@ -6,10 +6,12 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.use("Agg")
-
+pd.options.mode.chained_assignment = None
 
 def get_performance(data, geno_state):
     sub_data = data[data['Genotype'] == geno_state]
+    sub_data['Precision'] = sub_data['True_positives_length'] / sub_data['Inferred_tracts_length'] * 100
+    sub_data['Recall'] = sub_data['True_positives_length'] / sub_data['True_tracts_length'] * 100
     mean_performance = sub_data.groupby("Cutoff").mean(numeric_only=True).dropna()[['Precision', 'Recall']]
     var_performance = sub_data.groupby("Cutoff").var(numeric_only=True).dropna()[['Precision', 'Recall']]
     std_performance = np.sqrt(var_performance)
@@ -35,4 +37,4 @@ plt.xlabel('Recall (%)')
 plt.ylabel('Precision (%)')
 plt.legend(loc="lower left")
 
-plt.savefig(snakemake.output.png, bbox_inches='tight')
+plt.savefig(snakemake.output.pdf, bbox_inches='tight')
