@@ -8,12 +8,13 @@ import numpy as np
 feature_id = config["feature_id"]
 feature_config = config["feature_config"]
 nfeature = config["nfeature"]
-nref = config["nref"]
-ntgt = config["ntgt"]
 ploidy = config["ploidy"]
-geno_state_list = config["geno_states"]
 output_prefix = config["output_prefix"]
 win_step = config["win_step"]
+nref = config["nref"]
+ntgt = config["ntgt"]
+geno_state_list = config["geno_states"]
+dataset_state_list = config["dataset_states"]
 cutoff_num = config["cutoff_num"]
 cutoff_list = np.round(np.linspace(0, 1, cutoff_num, endpoint=False), 2)
 cutoff_list = np.append(cutoff_list, [0.99, 0.999])
@@ -46,7 +47,7 @@ for k in ["train", "test"]:
 
 train_demog = demog_id["train"]
 test_demog = demog_id["test"]
-performance_dir = f"results/performance/train_{train_demog}_test_{test_demog}/nref_{nref}/ntgt_{ntgt}"
+performance_dir = f"results/performance/train_{train_demog}_test_{test_demog}"
 
 
 ##### Target rules #####
@@ -54,14 +55,13 @@ performance_dir = f"results/performance/train_{train_demog}_test_{test_demog}/nr
 
 rule all:
     input:
-        expand("results/performance/{output_prefix}.performance.summary", output_prefix=output_prefix),
-        expand("results/plots/{output_prefix}.performance.png", output_prefix=output_prefix),
+        expand("results/plots/{output_prefix}.performance.pdf", output_prefix=output_prefix),
 
 
 ##### Modules #####
 
 
-include: "rules/simulation.smk"
-include: "rules/train.logistic.regression.smk"
-include: "rules/test.logistic.regression.smk"
-include: "rules/plot.smk"
+include: "../rules/commons/simulation.smk"
+include: "../rules/methods/lr/train.gaia.lr.smk"
+include: "../rules/methods/lr/test.gaia.lr.smk"
+include: "../rules/commons/plot.smk"
