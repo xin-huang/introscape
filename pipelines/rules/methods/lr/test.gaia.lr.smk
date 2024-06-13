@@ -135,7 +135,7 @@ rule summary:
             cutoff=cutoff_list
         ),
     output:
-        summary = "results/performance/{train_{train_demog}_test_{test_demog}/{output_prefix}.performance.summary",
+        summary = "results/plots/train_{train_demog}_test_{test_demog}/{output_prefix}.performance.summary",
     log:
         "logs/summary/train_{train_demog}_test_{test_demog}/{output_prefix}.log",
     resources:
