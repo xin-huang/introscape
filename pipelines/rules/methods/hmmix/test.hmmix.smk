@@ -1,7 +1,6 @@
 import numpy as np
 import os
 
-
 import make_mutationrate
 from make_mutationrate import make_mutation_rate
 from make_test_data import create_test_data
@@ -11,63 +10,7 @@ from helper_functions import Load_observations_weights_mutrates, handle_individu
 from bcf_vcf import make_out_group, make_ingroup_obs
 from hmm_functions import TrainModel, DecodeModel, HMMParam, read_HMM_parameters_from_file
 from hmm_functions import HMMParam, get_default_HMM_parameters, write_HMM_to_file
-
 from hmmix_additional_functions import *
-
-### CONFIG ###
-#configfile: "config/test_gorilla.config.yaml"
-
-
-params_set = "test"
-
-feature_id = config["feature_id"]
-feature_config = config["feature_config"]
-nfeature = config["nfeature"]
-nref = config["nref"]
-ntgt = config["ntgt"]
-ploidy = config["ploidy"]
-geno_state_list = config["geno_states"]
-win_step = config["win_step"]
-cutoff_num = config["cutoff_num"]
-cutoff_list = np.round(np.linspace(0, 1, cutoff_num, endpoint=False), 2)
-cutoff_list = np.append(cutoff_list, [0.99, 0.999])
-
-output_prefix = config["output_prefix"]
-nrep = config["nrep"][params_set]
-seq_len = config["seq_len"][params_set]
-demog_id = config["demog_id"][params_set]
-demes_file = config["demes"][params_set]
-mut_rate = config["mut_rate"][params_set]
-rec_rate = config["rec_rate"][params_set]
-ploidy = config["ploidy"]
-ref_id = config["ref_id"][params_set]
-tgt_id = config["tgt_id"][params_set]
-src_id = config["src_id"][params_set]
-
-#if binary==True in config file, do simulations with binary mutation model
-try:
-    binary = config["binary"]
-except KeyError:
-    binary = False
-
-if binary:
-    ref_set = ["0", "1"]
-else:
-    ref_set = ["A", "C", "G", "T"]
-
-
-np.random.seed(config["seed"])
-seed_list = np.random.random_integers(1, 2**31, nrep)
-
-
-output_dir = f'results/data/{params_set}/{demog_id}/nref_{nref}/ntgt_{ntgt}'
-skov_output_dir = f'results/SkovHMM/{params_set}/{demog_id}/nref_{nref}/ntgt_{ntgt}'
-
-
-
-rule all:
-    input:
-        expand(skov_output_dir + "/{seed}/output_ref_vs.txt", demog_id=demog_id, nref=nref, ntgt=ntgt, seed = seed_list)
 
 
 rule process_test_data:

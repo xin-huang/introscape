@@ -7,50 +7,6 @@ import pyranges as pr
 from multiprocessing import Process, Manager
 
 
-### CONFIG ###
-#configfile: "config/test_gorilla.config.yaml"
-
-params_set = "test"
-
-feature_id = config["feature_id"]
-feature_config = config["feature_config"]
-nfeature = config["nfeature"]
-nref = config["nref"]
-ntgt = config["ntgt"]
-ploidy = config["ploidy"]
-geno_state_list = config["geno_states"]
-win_step = config["win_step"]
-cutoff_num = config["cutoff_num"]
-cutoff_list = np.round(np.linspace(0, 1, cutoff_num, endpoint=False), 2)
-cutoff_list = np.append(cutoff_list, [0.99, 0.999])
-
-output_prefix = config["output_prefix"]
-nrep = config["nrep"][params_set]
-seq_len = config["seq_len"][params_set]
-demog_id = config["demog_id"][params_set]
-demes_file = config["demes"][params_set]
-mut_rate = config["mut_rate"][params_set]
-rec_rate = config["rec_rate"][params_set]
-ploidy = config["ploidy"]
-ref_id = config["ref_id"][params_set]
-tgt_id = config["tgt_id"][params_set]
-src_id = config["src_id"][params_set]
-
-#if binary==True in config file, do simulations with binary mutation model
-try:
-    binary = config["binary"]
-except KeyError:
-    binary = False
-
-
-np.random.seed(config["seed"])
-seed_list = np.random.random_integers(1, 2**31, nrep)
-
-#output_dir = output_dir + f'/{demog_id}/nref_{nref}/ntgt_{ntgt}'
-output_dir = f'results/data/{params_set}/{demog_id}/nref_{nref}/ntgt_{ntgt}'
-
-
-
 def create_final_tracts(tract_file):
     import pyranges as pr
     tract_file.columns=["Chromosome", "Start", "End", "Sample"]
@@ -133,13 +89,14 @@ def _get_truth_tracts(ts, tgt_id, src_id, ploidy):
 ### RULES ###
 
 
+'''
 rule all:
     input:
         expand(output_dir + "/{seed}/{output_prefix}.truth.tracts.bed",
                output_prefix=output_prefix, seed=seed_list),
         expand(output_dir + "/{seed}/{output_prefix}.vcf.gz",
                output_prefix=output_prefix, seed=seed_list),
-
+'''
 
 rule simulate_data:
     input:

@@ -46,3 +46,11 @@ src_id:
 
 win_step: 10000
 cutoff_num: 20 
+
+
+#sstar parameters
+scenarios: ["true", "const", "ref_tgt_only"]
+sstar_ms_params: {"true": {"yaml": "./config/demog/HumanNeanderthal_4G21_no_introgression.yaml", samples: [0, 0, 2, 100]},
+"const": {"yaml": "./config/demog/HumanNeanderthal_4G21_constant_no_introgression.yaml", samples: [0, 0, 2, 100]},
+"ref_tgt_only": {"yaml": "./config/demog/HumanNeanderthal_4G21_constant_ref_tgt_only.yaml", samples: [0, 2, 100]}}
+score_seqlen: 50000
