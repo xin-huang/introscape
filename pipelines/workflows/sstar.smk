@@ -16,7 +16,7 @@ configfile: "config/sstar/config_sstar.yaml"
 params_set = "test"
 
 nref = config["nref"]
-nref = config["nref"]
+#nref = config["nref"]
 ntgt = config["ntgt"]
 ploidy = config["ploidy"]
 win_step = config["win_step"]
@@ -31,7 +31,7 @@ demog_id = config["demog_id"][params_set]
 demes_file = config["demes"][params_set]
 mut_rate = config["mut_rate"][params_set]
 rec_rate = config["rec_rate"][params_set]
-ploidy = config["ploidy"]
+#ploidy = config["ploidy"]
 ref_id = config["ref_id"][params_set]
 tgt_id = config["tgt_id"][params_set]
 src_id = config["src_id"][params_set]

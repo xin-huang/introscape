@@ -17,15 +17,19 @@ rule all:
 rule mut_rec_combination:
     output:
         rates = sstar_output_dir_simulation + "/{scenario}/snps/rates.combination",
+    params:
+        seq_len = config.get("seq_len", 50000),
+	mut_rate = config["mut_rate"],
+	rec_rate = config["rec_rate"]
     resources: time_min=60, mem_mb=5000, cpus=1,
     threads: 1,
     run:
-        seq_len = 50000
+        seq_len = params.seq_len
 
         N0 = 1000
 
-    	mut_rate_mean = float(mut_rate)
-     	rec_rate_mean = float(rec_rate)
+    	mut_rate_mean = float(params.mut_rate)
+     	rec_rate_mean = float(params.rec_rate)
 
         scaled_mut_rate_mean = 4*N0*mut_rate_mean*seq_len
         scaled_mut_rate_sdv = 0.233
@@ -50,12 +54,12 @@ rule simulate_glm_data:
         ms = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sim1src.ms",
 
     params:
-        nsamp = lambda wildcards: 2*(int(1)+int(wildcards.ntgt)),
-        #nsamp = lambda wildcards: 2*(int(wildcards.nref)+int(wildcards.ntgt)),
+        #nsamp = lambda wildcards: 2*(int(1)+int(wildcards.ntgt)),
+        nsamp = lambda wildcards: 2*(int(wildcards.nref)+int(wildcards.ntgt)),
         #nreps = 10,
-        nreps = 20000,
+        nreps = config.get("nreps", 20000),
 
-        seq_len = 50000,
+        seq_len = config.get("seq_len", 50000),
 
         ms_exec = config["ms_exec"],
 
@@ -81,7 +85,7 @@ rule ms2vcf:
     params:
         nsamp = lambda wildcards: 2*(int(1)+int(wildcards.ntgt)),
 
-        seq_len = 50000,
+        seq_len = config.get("seq_len", 50000),
     resources: time_min=60, mem_mb=5000, cpus=1,
     threads: 1,
     run:
@@ -98,7 +102,7 @@ rule cal_score:
     output:
         score = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sim1src.sstar.scores",
     params:
-        seq_len = 50000,
+        seq_len = config.get("seq_len", 50000),
     resources: time_min=3000, mem_mb=10000, cpus=1,
     threads: 1,
     shell:
