@@ -24,7 +24,7 @@ rule decompress_volcanofinder:
         "logs/volcanofinder/decompress.log",
     shell:
         """
-        tabix -xvf {input.file} > {log} 2>&1
+        tar -xvf {input.file} > {log} 2>&1
         """
 
 
