@@ -1,0 +1,41 @@
+#-----------------------------------------------------------------------------------------------------------------------
+# for hg19 1000 genomes data
+type: 1000g
+species: hum
+scriptdir: /lisc/scratch/admixlab/harvi/scripts/volcanofinder
+samp_dir: /lisc/scratch/admixlab/harvi/scripts/apply_gaia/samples
+vcf_dir: /lisc/scratch/admixlab/harvi/hg19_1000genomes/biallelic_snps/ALL.chr
+vcf_suf: .phase3_shapeit2_mvncall_integrated_v5b.20130502.snps.vcf.gz
+samp:
+  - EUR_CEU
+ # - EUR_FIN
+ # - EUR_GBR
+ # - EUR_IBS
+ # - EUR_TSI
+ # - EAS_CDX
+ # - EAS_CHB 
+ # - EAS_CHS
+ # - EAS_JPT
+ # - EAS_KHV
+ # - SAS_BEB
+ # - SAS_GIH
+ # - SAS_ITU
+ # - SAS_PJL
+ # - SAS_STU
+ # - AMR_CLM
+ # - AMR_MXL
+ # - AMR_PEL
+ # - AMR_PUR
+ancbed: /lisc/scratch/admixlab/harvi/volcanofinder/hg19_1000g/vf_proc_vcf/nochr_anc_human
+hd_dir: /lisc/scratch/admixlab/harvi/volcanofinder/hg19_greatapes/
+block: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+nblock: 10
+#-----------------------------------------------------------------------------------------------------------------------
+downst_dir: 1000g/vf_out
+annotate_downst: yes
+annt: snpeff
+# data mapped to hg19 ref
+snpeff_reference: GRCh37.10
+#-----------------------------------------------------------------------------------------------------------------------
+introg_regions_present: no
+

@@ -1,0 +1,33 @@
+# for pan hg38 vcfs
+type: gape
+inpath: /lisc/scratch/admixlab/greatapes/pan_all/
+species: 3_pan_hg38
+samp_dir: /lisc/scratch/admixlab/harvi/scripts/apply_gaia/samples
+samp:
+  - hg38_BON
+ # - hg38_CCHIMP
+ # - hg38_ECHIMP
+ # - hg38_WCHIMP
+ # - hg38_NCHIMP
+scriptdir: /lisc/scratch/admixlab/harvi/scripts/volcanofinder
+ancbed: /lisc/scratch/admixlab/greatapes/ancgenome/anc_Pan
+hd_dir: /lisc/scratch/admixlab/harvi/volcanofinder/hg19_greatapes/
+block: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+nblock: 10
+#-----------------------------------------------------------------------------------------------------------------------
+downst_dir: 3_pan_hg38/vf_out
+annotate_downst: yes
+annt: vep
+# data mapped to hg38 ref
+vep_species: homo_sapiens
+vep_build: GRCh38
+vep_release: 110
+# if annt: snpeff # need to provide name of snpeff database for given species 
+  # snpeff_reference # eg GRCh38.99
+#-----------------------------------------------------------------------------------------------------------------------
+introg_regions_present: no
+# if introg_regions_present:'yes' # need to provide 
+  # sstar_bed # path to sstar outlier regions
+  # hmmix_bed # path to hmmix outlier regions
+  # can provide both or one of these files 
+  
