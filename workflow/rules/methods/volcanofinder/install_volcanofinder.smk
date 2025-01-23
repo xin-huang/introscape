@@ -24,7 +24,7 @@ rule decompress_volcanofinder:
         "logs/volcanofinder/decompress.log",
     shell:
         """
-        tar -xvf {input.file} > {log} 2>&1
+        tar -xvf {input.file} -C "resources/tools/" > {log} 2>&1
         """
 
 
@@ -37,12 +37,11 @@ rule compile_volcanofinder:
         "logs/volcanofinder/compile.log",
     shell:
         """
-        cd {input.dir} && \
         sed -i -e 's/ \*data;/;/' \
                -e '22iextern struct datatype *data;' \
                -e 's/ \*data_rec;/;/' \
                -e '33iextern struct datatype_rec *data_rec;' \
                -e 's/ \*data_bvalue;/;/' \
-               -e '42iextern struct datatype_bvalue *data_bvalue;' VolcanoFinder.h && \
-        make > {log} 2>&1
+               -e '42iextern struct datatype_bvalue *data_bvalue;' {input.dir}/VolcanoFinder.h && \
+        make -C {input.dir} > {log} 2>&1
         """
