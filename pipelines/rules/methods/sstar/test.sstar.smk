@@ -50,8 +50,7 @@ rule simulate_glm_data:
         ms = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sim1src.ms",
 
     params:
-        nsamp = lambda wildcards: 2*(int(1)+int(wildcards.ntgt)),
-        #nsamp = lambda wildcards: 2*(int(wildcards.nref)+int(wildcards.ntgt)),
+        nsamp = lambda wildcards: 2*(int(wildcards.nref)+int(1)),
         #nreps = 10,
         nreps = 20000,
 
@@ -79,7 +78,7 @@ rule ms2vcf:
         ss_tgt = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sstarsim.tgt.ind.list",
 
     params:
-        nsamp = lambda wildcards: 2*(int(1)+int(wildcards.ntgt)),
+        nsamp = lambda wildcards: 2*(int(wildcards.nref)+int(1)),
 
         seq_len = 50000,
     resources: time_min=60, mem_mb=5000, cpus=1,

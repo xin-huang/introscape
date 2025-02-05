@@ -16,7 +16,6 @@ configfile: "config/sstar/config_sstar.yaml"
 params_set = "test"
 
 nref = config["nref"]
-nref = config["nref"]
 ntgt = config["ntgt"]
 ploidy = config["ploidy"]
 win_step = config["win_step"]
@@ -25,19 +24,15 @@ cutoff_list = np.round(np.linspace(0, 1, cutoff_num, endpoint=False), 2)
 cutoff_list = np.append(cutoff_list, [0.99, 0.999])
 
 output_prefix = config["output_prefix"]
-nrep = config["nrep"][params_set]
-seq_len = config["seq_len"][params_set]
-demog_id = config["demog_id"][params_set]
-demes_file = config["demes"][params_set]
-mut_rate = config["mut_rate"][params_set]
-rec_rate = config["rec_rate"][params_set]
-ploidy = config["ploidy"]
-ref_id = config["ref_id"][params_set]
-tgt_id = config["tgt_id"][params_set]
-src_id = config["src_id"][params_set]
-
-#np.random.seed(config["seed"])
-#seed_list = np.random.random_integers(1, 2**31, nrep)
+nrep = config["nrep"]
+seq_len = config["seq_len"]
+demog_id = config["demog_id"]
+demes_file = config["demes_file"]
+mut_rate = config["mut_rate"]
+rec_rate = config["rec_rate"]
+ref_id = config["ref_id"]
+tgt_id = config["tgt_id"]
+src_id = config["src_id"]
 
 snp_num_list = np.arange(25,705,5)
 quantile_list = config["quantiles"]
@@ -48,9 +43,7 @@ sstar_output_dir = f'results/sstar/{params_set}/{demog_id}/nref_{nref}/ntgt_{ntg
 sstar_output_dir_simulation = os.path.join(sstar_output_dir, "simulation")
 
 #only in case that no new data is simulated
-#seed_list = list_subdirectories(output_dir)
 seed_list = np.random.random_integers(1, 2**31, nrep)
-
 
 new_params = config["sstar_ms_params"]
 scenario_list = config["scenarios"]
