@@ -126,12 +126,13 @@ rule all:
 
 
 rule simulate_data:
-    input:
     output:
         ts = output_dir + "/{seed}/{output_prefix}.ts",
         vcf = output_dir + "/{seed}/{output_prefix}.vcf",
         ref = output_dir + "/{seed}/{output_prefix}.ref.ind.list",
         tgt = output_dir + "/{seed}/{output_prefix}.tgt.ind.list",
+    log:
+        "logs/sim.{seed}.{output_prefix}.log",
     run:
         import demes, msprime
         demo_graph = demes.load(demes_file)
@@ -192,6 +193,8 @@ rule get_truth_tracts:
         bed = output_dir + "/{seed}/{output_prefix}.truth.tracts.bed",
     resources:
         partition="himem", time=120, nodes=1, mem_gb=2000, cpus=128,
+    log:
+        "logs/tract.{seed}.{output_prefix}.log",
     run:
 
 
