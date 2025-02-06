@@ -19,6 +19,8 @@ rule mut_rec_combination:
         rates = sstar_output_dir_simulation + "/{scenario}/snps/rates.combination",
     resources: time_min=60, mem_mb=5000, cpus=1,
     threads: 1,
+    log:
+        "logs/sstar/mutrec.{scenario}.log",
     run:
         seq_len = 50000
 
@@ -48,7 +50,8 @@ rule simulate_glm_data:
         rates = rules.mut_rec_combination.output.rates,
     output:
         ms = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sim1src.ms",
-
+    log:
+        "logs/sstar/msglm.{scenario}.{params_set}.{demog}.{nref}.{ntgt}.{snp_num}.log",
     params:
         nsamp = lambda wildcards: 2*(int(wildcards.nref)+int(1)),
         #nreps = 10,
@@ -76,7 +79,8 @@ rule ms2vcf:
         #create lists for sstar simulations
         ss_ref = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sstarsim.ref.ind.list",
         ss_tgt = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sstarsim.tgt.ind.list",
-
+    log:
+        "logs/sstar/ms2vcf.{scenario}.{params_set}.{demog}.{nref}.{ntgt}.{snp_num}.log",
     params:
         nsamp = lambda wildcards: 2*(int(wildcards.nref)+int(1)),
 
@@ -98,6 +102,8 @@ rule cal_score:
         score = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sim1src.sstar.scores",
     params:
         seq_len = 50000,
+    log:
+        "logs/sstar/sstarcalcscore.{scenario}.{params_set}.{demog}.{nref}.{ntgt}.{snp_num}.log",
     resources: time_min=3000, mem_mb=10000, cpus=1,
     threads: 1,
     shell:
@@ -113,6 +119,8 @@ rule cal_quantile:
         quantile = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' + "/simulation/{scenario}/snps/{snp_num}/sim1src.sstar.quantile",
     params:
         sim_quantiles = quantile_list,
+    log:
+        "logs/sstar/sstarcalcquant.{scenario}.{params_set}.{demog}.{nref}.{ntgt}.{snp_num}.log",
     resources: time_min=3000, mem_mb=5000, cpus=1,
     threads: 1,
     run:
@@ -131,6 +139,8 @@ rule quantile_summary:
         output_res = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +  "/simulation/{scenario}/quantile.1src.summary.txt",
     resources: time_min=3000, mem_mb=5000, cpus=1,
     threads: 1,
+    log:
+        "logs/sstar/sstarquantsum.{scenario}.{params_set}.{demog}.{nref}.{ntgt}.{snp_num}.log",
     shell:
         """
         cat {input.res} | sort -nk 2,2 | sed '1iS*_score\\tSNP_number\\tquantile\n' > {output.output_res}
@@ -149,6 +159,8 @@ rule sstar_score:
         seq_len = score_seqlen,
     resources: time_min=3000, mem_mb=10000, cpus=1,
     threads: 1,
+    log:
+        "logs/sstar/sstarscore.{params_set}.{demog}.{nref}.{ntgt}.{seed}.log",
     shell:
         """
         sstar score --vcf {input.vcf} --ref {input.ref_ind} --tgt {input.tgt_ind} --output {output.score} --thread {threads} --win-len {params.seq_len} --win-step 10000
@@ -167,6 +179,8 @@ rule sstar_threshold:
         R_LIBS = libr_dir,
     resources: time_min=3000, mem_mb=10000, cpus=1,
     threads: 1,
+    log:
+        "logs/sstar/sstarthresh.{params_set}.{demog}.{nref}.{ntgt}.{seed}.{scenario}.{quantile}.log",
     shell:
         """
         export R_LIBS={params.R_LIBS}
@@ -183,6 +197,8 @@ rule sstar_process_output:
         accuracy = "results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}" + "/{seed}/{scenario}/sstar.1src.quantile.{quantile}.out.accuracy",
     resources: time_min=3000, mem_mb=10000, cpus=1,
     threads: 1,
+    log:
+        "logs/sstar/sstarprocout.{params_set}.{demog}.{nref}.{ntgt}.{seed}.{scenario}.{quantile}.log",
     run:
         process_sstar_1src_output(input.quantiles, output.inferred_tracts)
         precision, recall = cal_accuracy(input.true_tracts, output.inferred_tracts)
@@ -198,6 +214,8 @@ rule accuracy_summary:
         accuracy_table = sstar_output_dir + "/sstar_1src_accuracy.txt",
     resources: time_min=60, mem_mb=2000, cpus=1,
     threads: 1,
+    log:
+        "logs/sstar/accuracy.{params_set}.{demog}.{nref}.{ntgt}.{seed}.{scenario}.{quantile}.log",
     shell:
         """
         cat {input.accuracy_files} | sed '1idemography\\tscenario\\tsample\\tcutoff\\tprecision\\trecall' > {output.accuracy_table}
