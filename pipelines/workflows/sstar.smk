@@ -1,6 +1,8 @@
 import os
 import numpy as np
+import random
 
+seed = random.randint(1, 2147483648 + 1) # specify seed like this?
 
 try:
     libr_dir = os.environ["CONDA_PREFIX"] + "/lib/R/library"
@@ -59,14 +61,27 @@ except KeyError:
 ##### Target rules #####
 
 
-rule all:
-    input:
-        sstar_output_dir + "/sstar_1src_accuracy.txt",
+#rule all:
+#    input:
+#        sstar_output_dir + "/sstar_1src_accuracy.txt",
 
 
 ##### Modules #####
 
-
-include: "../rules/commons/simulation_mp_extended.smk"
-include: "../rules/methods/sstar/test.sstar.smk"
+#include: "../rules/commons/simulation_mp_extended.smk"
+#include: "../rules/methods/sstar/test.sstar.smk"
 #include: "../rules/commons/plot.smk"
+
+#-----------------------------------------------------------------------------------------------------------------------
+
+rule all:
+    input:
+        expand("{output_dir}/{seed}/{output_prefix}.ts", output_dir=output_dir, seed=seed, output_prefix=output_prefix),
+        expand("{output_dir}/{seed}/{output_prefix}.vcf.gz", output_dir=output_dir, seed=seed, output_prefix=output_prefix),
+        expand("{output_dir}/{seed}/{output_prefix}.truth.tracts.bed", output_dir=output_dir, seed=seed, output_prefix=output_prefix)
+
+# test install_external_tools.smk & simulation_mp_extended.smk
+#include: "../rules/commons/install_external_tools.smk"
+#include: "../rules/commons/simulation_mp_extended.smk" # tested & executes
+include: "../rules/commons/simulation_mp_extended_short.smk"
+
