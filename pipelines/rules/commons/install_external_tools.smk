@@ -16,36 +16,59 @@
 #
 #    https://www.gnu.org/licenses/gpl-3.0.en.html
 
+rule all:
+    input:
+        "resources/msdir/ms",
+        "resources/SPrime/sprime.jar",
+        "resources/flags/.skovscripts.downloaded"
+
 
 rule install_ms_for_sstar:
-    input:
     output:
         "resources/msdir/ms",
     log:
         "logs/install_ms_for_sstar/install_ms_for_sstar.log",
     shell:
         """
-        cd resources 2>> {log}
-        tar -xvf ms.tar.gz 2>> {log}
-        cd msdir 2>> {log}
-        gcc -o ms ms.c streec.c rand1.c -lm 2>> {log}
+        cd resources
+        tar -xvf ms.tar.gz
+        cd msdir
+        gcc -o ms ms.c streec.c rand1.c -lm
         """
 
 
 rule install_SPrime:
-    input:
     output:
         "resources/SPrime/sprime.jar",
         directory("resources/SPrime/sprimepipeline"),
     log:
         "logs/install_SPrime/install_SPrime.log",
+    params:
+        outdir = "resources/SPrime"
     shell:
         """
-        cd resources 2>> {log}
-        mkdir SPrime && cd SPrime 2>> {log}
-        wget https://faculty.washington.edu/browning/sprime.jar 2>> {log}
-        git clone https://github.com/YingZhou001/sprimepipeline 2>> {log}
-        chmod a+x sprimepipeline/pub.pipeline.pbs/tools/map_arch_genome/map_arch 2>> {log}
-        sed 's/out<-c()/out<-data.frame()/' sprimepipeline/pub.pipeline.pbs/tools/score_summary.r > tmp 2>> {log}
-        mv tmp sprimepipeline/pub.pipeline.pbs/tools/score_summary.r 2>> {log}
+	mkdir -p {params.outdir}
+	cd {params.outdir}
+        wget https://faculty.washington.edu/browning/sprime.jar
+        git clone https://github.com/YingZhou001/sprimepipeline
+        chmod a+x sprimepipeline/pub.pipeline.pbs/tools/map_arch_genome/map_arch
+        sed 's/out<-c()/out<-data.frame()/' sprimepipeline/pub.pipeline.pbs/tools/score_summary.r > tmp
+        mv tmp sprimepipeline/pub.pipeline.pbs/tools/score_summary.r
+        """
+
+rule get_hmmix_scripts:
+    output:
+        download_flag = "resources/flags/.skovscripts.downloaded"
+    resources: nodes=1, ntasks=1, time_min=60, mem_gb=30, cpus=1
+    log:
+        "logs/gitclone_skovscripts.log"
+    params:
+        outdir = "resources/skov_scripts"
+    shell:
+        """
+        mkdir -p {params.outdir}
+        cd {params.outdir}
+        git clone https://github.com/LauritsSkov/Introgression-detection
+	cd ../../
+	touch {output.download_flag}
         """
