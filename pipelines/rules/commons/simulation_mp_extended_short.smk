@@ -92,5 +92,5 @@ rule mp_get_truth_tracts:
         """    
         python simulation_mp.py \
          --inputts '{input.ts}' --tgtid '{params.tgt_id}' \
-         --srcid '{params.src_id}''  --ploidy {params.ploidy} --output '{output.bed}'
+         --srcid '{params.src_id}'  --ploidy {params.ploidy} --output '{output.bed}'
         """

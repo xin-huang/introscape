@@ -2,8 +2,8 @@ import os
 import demes
 import numpy as np
 import pandas as pd
-from scipy.stats import norm
-from scipy.stats import nbinom
+#from scipy.stats import norm
+#from scipy.stats import nbinom
 
 from sstar_additional_functions import *
 
@@ -17,32 +17,45 @@ rule all:
 rule mut_rec_combination:
     output:
         rates = sstar_output_dir_simulation + "/{scenario}/snps/rates.combination",
+    params:
+        seq_len = 50000,
+        mut_rate = config["mut_rate"],
+        rec_rate = config["rec_rate"],
+        scriptdir = "../rules/methods/sstar"
     resources: time_min=60, mem_mb=5000, cpus=1,
     threads: 1,
+    conda:
+        "../envs/sstar-env.yaml",
     log:
         "logs/sstar/mutrec.{scenario}.log",
-    run:
-        seq_len = 50000
-
-        N0 = 1000
-
-    	mut_rate_mean = float(mut_rate)
-     	rec_rate_mean = float(rec_rate)
-
-        scaled_mut_rate_mean = 4*N0*mut_rate_mean*seq_len
-        scaled_mut_rate_sdv = 0.233
-
-        scaled_rec_rate_mean = 4*N0*rec_rate_mean*seq_len
-        mut_rate_list = norm.rvs(loc=scaled_mut_rate_mean, scale=scaled_mut_rate_sdv, size=20000)
-        rec_rate_list = nbinom.rvs(n=0.5, p=0.5/(0.5+scaled_rec_rate_mean), size=20000)
-
-        with open(output.rates, 'w') as o:
-            for i in range(len(mut_rate_list)):
-                if mut_rate_list[i] < 0.001: mut_rate_list[i] = 0.001
-                if rec_rate_list[i] < 0.001: rec_rate_list[i] = 0.001
-                mut_rate_new = mut_rate_list[i]
-                rec_rate_new = rec_rate_list[i]
-                o.write(f'{mut_rate_new}\t{rec_rate_new}\n')
+    shell:
+        """    
+        python {params.scriptdir}/mut_rec.py \
+         --seqlen {params.seq_len}  --mutrate {params.mut_rate} \
+         --recrate {params.rec_rate} --outfile '{output.rates}'
+        """
+#    run:
+#        seq_len = 50000
+#
+#        N0 = 1000
+#
+#    	mut_rate_mean = float(mut_rate)
+#     	rec_rate_mean = float(rec_rate)
+#
+#        scaled_mut_rate_mean = 4*N0*mut_rate_mean*seq_len
+#        scaled_mut_rate_sdv = 0.233
+#
+#        scaled_rec_rate_mean = 4*N0*rec_rate_mean*seq_len
+#        mut_rate_list = norm.rvs(loc=scaled_mut_rate_mean, scale=scaled_mut_rate_sdv, size=20000)
+#        rec_rate_list = nbinom.rvs(n=0.5, p=0.5/(0.5+scaled_rec_rate_mean), size=20000)
+#
+#        with open(output.rates, 'w') as o:
+#            for i in range(len(mut_rate_list)):
+#                if mut_rate_list[i] < 0.001: mut_rate_list[i] = 0.001
+#                if rec_rate_list[i] < 0.001: rec_rate_list[i] = 0.001
+#                mut_rate_new = mut_rate_list[i]
+#                rec_rate_new = rec_rate_list[i]
+#                o.write(f'{mut_rate_new}\t{rec_rate_new}\n')
 
 
 rule simulate_glm_data:
@@ -56,13 +69,9 @@ rule simulate_glm_data:
         nsamp = lambda wildcards: 2*(int(wildcards.nref)+int(1)),
         #nreps = 10,
         nreps = 20000,
-
         seq_len = 50000,
-
         ms_exec = config["ms_exec"],
-
         ms_params = lambda wildcards: demes.to_ms(demes.load(new_params[wildcards.scenario]["yaml"]), N0=1000, samples=new_params[wildcards.scenario]["samples"]),
-
     resources: time_min=60, mem_mb=5000, cpus=1,
     threads: 1,
     shell:
@@ -83,8 +92,8 @@ rule ms2vcf:
         "logs/sstar/ms2vcf.{scenario}.{params_set}.{demog}.{nref}.{ntgt}.{snp_num}.log",
     params:
         nsamp = lambda wildcards: 2*(int(wildcards.nref)+int(1)),
-
         seq_len = 50000,
+	ploidy = config["ploidy"]
     resources: time_min=60, mem_mb=5000, cpus=1,
     threads: 1,
     run:
@@ -102,6 +111,8 @@ rule cal_score:
         score = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sim1src.sstar.scores",
     params:
         seq_len = 50000,
+    conda:
+        "../envs/sstar-env.yaml",
     log:
         "logs/sstar/sstarcalcscore.{scenario}.{params_set}.{demog}.{nref}.{ntgt}.{snp_num}.log",
     resources: time_min=3000, mem_mb=10000, cpus=1,
@@ -140,11 +151,10 @@ rule quantile_summary:
     resources: time_min=3000, mem_mb=5000, cpus=1,
     threads: 1,
     log:
-        "logs/sstar/sstarquantsum.{scenario}.{params_set}.{demog}.{nref}.{ntgt}.{snp_num}.log",
+        "logs/sstar/sstarquantsum.{scenario}.{params_set}.{demog}.{nref}.{ntgt}.log",
     shell:
         """
         cat {input.res} | sort -nk 2,2 | sed '1iS*_score\\tSNP_number\\tquantile\n' > {output.output_res}
-
         """
 
 
@@ -159,6 +169,8 @@ rule sstar_score:
         seq_len = score_seqlen,
     resources: time_min=3000, mem_mb=10000, cpus=1,
     threads: 1,
+    conda:
+        "../envs/sstar-env.yaml",
     log:
         "logs/sstar/sstarscore.{params_set}.{demog}.{nref}.{ntgt}.{seed}.log",
     shell:
@@ -179,6 +191,8 @@ rule sstar_threshold:
         R_LIBS = libr_dir,
     resources: time_min=3000, mem_mb=10000, cpus=1,
     threads: 1,
+    conda:
+        "../envs/sstar-env.yaml",
     log:
         "logs/sstar/sstarthresh.{params_set}.{demog}.{nref}.{ntgt}.{seed}.{scenario}.{quantile}.log",
     shell:
@@ -215,7 +229,7 @@ rule accuracy_summary:
     resources: time_min=60, mem_mb=2000, cpus=1,
     threads: 1,
     log:
-        "logs/sstar/accuracy.{params_set}.{demog}.{nref}.{ntgt}.{seed}.{scenario}.{quantile}.log",
+        "logs/sstar/accuracy.log",
     shell:
         """
         cat {input.accuracy_files} | sed '1idemography\\tscenario\\tsample\\tcutoff\\tprecision\\trecall' > {output.accuracy_table}
