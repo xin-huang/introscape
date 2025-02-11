@@ -21,16 +21,15 @@ rule mut_rec_combination:
         seq_len = 50000,
         mut_rate = config["mut_rate"],
         rec_rate = config["rec_rate"],
-        scriptdir = "../rules/methods/sstar"
     resources: time_min=60, mem_mb=5000, cpus=1,
     threads: 1,
     conda:
-        "../envs/sstar-env.yaml",
+        "../../../envs/sstar-env.yaml",
     log:
         "logs/sstar/mutrec.{scenario}.log",
     shell:
         """    
-        python {params.scriptdir}/mut_rec.py \
+        python pipelines/rules/methods/sstar/mut_rec.py \
          --seqlen {params.seq_len}  --mutrate {params.mut_rate} \
          --recrate {params.rec_rate} --outfile '{output.rates}'
         """
@@ -112,7 +111,7 @@ rule cal_score:
     params:
         seq_len = 50000,
     conda:
-        "../envs/sstar-env.yaml",
+        "../../../envs/sstar-env.yaml",
     log:
         "logs/sstar/sstarcalcscore.{scenario}.{params_set}.{demog}.{nref}.{ntgt}.{snp_num}.log",
     resources: time_min=3000, mem_mb=10000, cpus=1,
@@ -170,7 +169,7 @@ rule sstar_score:
     resources: time_min=3000, mem_mb=10000, cpus=1,
     threads: 1,
     conda:
-        "../envs/sstar-env.yaml",
+        "../../../envs/sstar-env.yaml",
     log:
         "logs/sstar/sstarscore.{params_set}.{demog}.{nref}.{ntgt}.{seed}.log",
     shell:
@@ -192,7 +191,7 @@ rule sstar_threshold:
     resources: time_min=3000, mem_mb=10000, cpus=1,
     threads: 1,
     conda:
-        "../envs/sstar-env.yaml",
+        "../../../envs/sstar-env.yaml",
     log:
         "logs/sstar/sstarthresh.{params_set}.{demog}.{nref}.{ntgt}.{seed}.{scenario}.{quantile}.log",
     shell:

@@ -90,7 +90,7 @@ rule mp_get_truth_tracts:
         partition="himem", time=120, nodes=1, mem_gb=2000, cpus=128,
     shell:
         """    
-        python simulation_mp.py \
+        python pipelines/rules/commons/simulation_mp.py \
          --inputts '{input.ts}' --tgtid '{params.tgt_id}' \
          --srcid '{params.src_id}'  --ploidy {params.ploidy} --output '{output.bed}'
         """
