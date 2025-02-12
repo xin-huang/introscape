@@ -17,16 +17,15 @@ cutoff_list = np.round(np.linspace(0, 1, cutoff_num, endpoint=False), 2)
 cutoff_list = np.append(cutoff_list, [0.99, 0.999])
 
 output_prefix = config["output_prefix"]
-nrep = config["nrep"][params_set]
-seq_len = config["seq_len"][params_set]
-demog_id = config["demog_id"][params_set]
-demes_file = config["demes"][params_set]
-mut_rate = config["mut_rate"][params_set]
-rec_rate = config["rec_rate"][params_set]
-ploidy = config["ploidy"]
-ref_id = config["ref_id"][params_set]
-tgt_id = config["tgt_id"][params_set]
-src_id = config["src_id"][params_set]
+nrep = config["nrep"]
+seq_len = config["seq_len"]
+demog_id = config["demog_id"]
+demes_file = config["demes_file"]
+mut_rate = config["mut_rate"]
+rec_rate = config["rec_rate"]
+ref_id = config["ref_id"]
+tgt_id = config["tgt_id"]
+src_id = config["src_id"]
 
 #if binary==True in config file, do simulations with binary mutation model
 try:

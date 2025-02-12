@@ -26,6 +26,10 @@ rule process_test_data:
         partition = "basic",
         mem_gb = 32,
         cpus = 16,
+    log:
+        "logs/hmmix/proctestdata.{seed}.log",
+    benchmark:
+        "benchmarks/hmmix/proctestdata.{seed}.benchmark.txt",
     run:
         with open(input.ref_list, 'r') as file:
 

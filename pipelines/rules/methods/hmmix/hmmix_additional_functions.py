@@ -3,15 +3,19 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 import pybedtools
+import sys
+
+# path to skov helper scripts for hmmix
+skov_dir = f"resources/skov_scripts/Introgression-detection/src/"
+sys.path.append(skov_dir)
 
 
-from helper_functions import sortby, Make_folder_if_not_exists, load_fasta, convert_to_bases, clean_files
+#from helper_functions import sortby, Make_folder_if_not_exists, load_fasta, convert_to_bases, clean_files
 
-from hmm_functions import HMMParam, get_default_HMM_parameters, write_HMM_to_file
+from hmm_functions import TrainModel, DecodeModel, HMMParam, get_default_HMM_parameters, write_HMM_to_file, read_HMM_parameters_from_file
 from make_test_data import create_test_data
-from hmm_functions import TrainModel, DecodeModel, HMMParam, read_HMM_parameters_from_file
 from helper_functions import *
-#from helper_functions import Load_observations_weights_mutrates
+
 
 
 def Write_Decoded_output(outputprefix, segments, obs_file = None, admixpop_file = None, extrainfo = False):
