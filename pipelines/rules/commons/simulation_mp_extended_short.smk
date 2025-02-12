@@ -24,6 +24,8 @@ rule simulate_data:
         tgt = output_dir + "/{seed}/{output_prefix}.tgt.ind.list",
     log:
         "logs/sim.{seed}.{output_prefix}.log",
+    benchmark:
+        "benchmarks/sim.{seed}.{output_prefix}.benchmark.txt",
     run:
         import demes, msprime
         demo_graph = demes.load(demes_file)
@@ -82,6 +84,8 @@ rule mp_get_truth_tracts:
         bed = output_dir + "/{seed}/{output_prefix}.truth.tracts.bed",
     log:
         "logs/tract.{seed}.{output_prefix}.log",
+    benchmark:
+        "benchmarks/tract.{seed}.{output_prefix}.benchmark.txt",
     params:
         tgt_id = config["tgt_id"],
         src_id = config["src_id"],
