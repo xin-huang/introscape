@@ -59,6 +59,12 @@ rule all:
 ##### Modules #####
 
 
-include: "../rules/commons/simulation_mp_extended.smk"
-include: "../rules/methods/hmmix/test.hmmix.smk"
+#include: "../rules/commons/simulation_mp_extended.smk"
+#include: "../rules/methods/hmmix/test.hmmix.smk"
 #include: "../rules/commons/plot.smk"
+
+#-----------------------------------------------------------------------------------------------------------------------
+# testing
+include: "../rules/commons/simulation_mp_extended_short.smk"
+include: "../rules/methods/hmmix/test.hmmix_short.smk"
+

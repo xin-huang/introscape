@@ -25,7 +25,7 @@ rule process_test_data:
         "benchmarks/hmmix/proctestdata.{seed}.benchmark.txt",
     params:
         skov_output_dir = skov_output_dir,
-        ref_id = ref_set,
+        ref_set = ref_set,
         ref_id = config["ref_id"],
         src_id = config["src_id"]
     shell:

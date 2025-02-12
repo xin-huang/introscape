@@ -19,10 +19,12 @@ rule sprime_run:
         score = os.path.join(sprime_output_dir, "{demog}/nref_{nref}/ntgt_{ntgt}/{seed}/{threshold}/sprime.1src.out.{threshold}.score"),
     params:
         sprime_exec = config["sprime_exec"],
-
         threshold = lambda wildcards: wildcards.threshold,
         output_prefix = os.path.join(sprime_output_dir, "{demog}/nref_{nref}/ntgt_{ntgt}/{seed}/{threshold}/sprime.1src.out.{threshold}")
-
+    log:
+        "logs/sprime/sprimerun.{demog}.{nref}.{ntgt}.{seed}/{threshold}.log",
+    benchmark:
+        "benchmarks/sprime/sprimerun.{demog}.{nref}.{ntgt}.{seed}/{threshold}.benchmark.txt",
     resources: time_min=60, mem_mb=2000, cpus=1,
     threads: 1,
     run:
@@ -43,6 +45,10 @@ rule sprime_process_output:
     output:
         inferred_tracts = os.path.join(sprime_output_dir, "{demog}/nref_{nref}/ntgt_{ntgt}/{seed}/{threshold}/sprime.1src.out.{threshold}.bed"),
         accuracy = os.path.join(sprime_output_dir, "{demog}/nref_{nref}/ntgt_{ntgt}/{seed}/{threshold}/sprime.1src.out.{threshold}.accuracy"),
+    log:
+        "logs/sprime/sprimeprocout.{demog}.{nref}.{ntgt}.{seed}/{threshold}.log",
+    benchmark:
+        "benchmarks/sprime/sprimeprocout.{demog}.{nref}.{ntgt}.{seed}/{threshold}.benchmark.txt",
     resources: time_min=60, mem_mb=2000, cpus=1,
     threads: 1,
     run:
