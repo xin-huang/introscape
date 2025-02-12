@@ -2,8 +2,6 @@ import os
 import demes
 import numpy as np
 import pandas as pd
-#from scipy.stats import norm
-#from scipy.stats import nbinom
 
 from sstar_additional_functions import *
 
@@ -33,29 +31,6 @@ rule mut_rec_combination:
          --seqlen {params.seq_len}  --mutrate {params.mut_rate} \
          --recrate {params.rec_rate} --outfile '{output.rates}'
         """
-#    run:
-#        seq_len = 50000
-#
-#        N0 = 1000
-#
-#    	mut_rate_mean = float(mut_rate)
-#     	rec_rate_mean = float(rec_rate)
-#
-#        scaled_mut_rate_mean = 4*N0*mut_rate_mean*seq_len
-#        scaled_mut_rate_sdv = 0.233
-#
-#        scaled_rec_rate_mean = 4*N0*rec_rate_mean*seq_len
-#        mut_rate_list = norm.rvs(loc=scaled_mut_rate_mean, scale=scaled_mut_rate_sdv, size=20000)
-#        rec_rate_list = nbinom.rvs(n=0.5, p=0.5/(0.5+scaled_rec_rate_mean), size=20000)
-#
-#        with open(output.rates, 'w') as o:
-#            for i in range(len(mut_rate_list)):
-#                if mut_rate_list[i] < 0.001: mut_rate_list[i] = 0.001
-#                if rec_rate_list[i] < 0.001: rec_rate_list[i] = 0.001
-#                mut_rate_new = mut_rate_list[i]
-#                rec_rate_new = rec_rate_list[i]
-#                o.write(f'{mut_rate_new}\t{rec_rate_new}\n')
-
 
 rule simulate_glm_data:
     input:
@@ -79,24 +54,60 @@ rule simulate_glm_data:
         """
 
 
+#rule ms2vcf:
+#    input:
+#        ms = rules.simulate_glm_data.output.ms,
+#    output:
+#        vcf = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sim1src.vcf",
+#        #create lists for sstar simulations
+#        ss_ref = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sstarsim.ref.ind.list",
+#        ss_tgt = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sstarsim.tgt.ind.list",
+#    log:
+#        "logs/sstar/ms2vcf.{scenario}.{params_set}.{demog}.{nref}.{ntgt}.{snp_num}.log",
+#    params:
+#        nsamp = lambda wildcards: 2*(int(wildcards.nref)+int(1)),
+#        seq_len = 50000,
+#	ploidy = config["ploidy"]
+#    resources: time_min=3000, mem_mb=10000, cpus=1,
+#    threads: 1,
+#    run:
+#        ms2vcf_create_ind_lists(input.ms, output.vcf, params.nsamp, params.seq_len, output.ss_ref, output.ss_tgt, ind_prefix="tsk_")
+
+#-----------------------------------------------------------------------------------------------------------------------
+# create ind file lists for ms simulations
+rule ms_ind_lists:
+    output:
+        ss_ref = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/sstarsim.ref.ind.list",
+        ss_tgt = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/sstarsim.tgt.ind.list",
+    log:
+        "logs/sstar/ms_ind_lists.{scenario}.{params_set}.{demog}.{nref}.{ntgt}.log",
+    params:
+        nsamp = lambda wildcards: 2*(int(wildcards.nref)+int(1)),
+        ploidy = config["ploidy"]
+    resources: time_min=60, mem_mb=5000, cpus=1,
+    threads: 1,
+    run:
+        create_ind_lists(params.nsamp, output.ss_ref, output.ss_tgt, params.ploidy, ind_prefix="tsk_")
+
 rule ms2vcf:
     input:
         ms = rules.simulate_glm_data.output.ms,
     output:
         vcf = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sim1src.vcf",
-        #create lists for sstar simulations
-        ss_ref = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sstarsim.ref.ind.list",
-        ss_tgt = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sstarsim.tgt.ind.list",
     log:
         "logs/sstar/ms2vcf.{scenario}.{params_set}.{demog}.{nref}.{ntgt}.{snp_num}.log",
     params:
         nsamp = lambda wildcards: 2*(int(wildcards.nref)+int(1)),
         seq_len = 50000,
-	ploidy = config["ploidy"]
-    resources: time_min=60, mem_mb=5000, cpus=1,
+        ploidy = config["ploidy"]
+    resources: 
+        time = lambda wildcards: 360 if (int(wildcards.snp_num) < 340) else 1000,
+        mem_gb = lambda wildcards: 10 if (int(wildcards.snp_num) < 340) else 100,
+        cpus = 1
     threads: 1,
     run:
-        ms2vcf_create_ind_lists(input.ms, output.vcf, params.nsamp, params.seq_len, output.ss_ref, output.ss_tgt, ind_prefix="tsk_")
+        ms2vcf(input.ms, output.vcf, params.nsamp, params.seq_len, params.ploidy, ind_prefix="tsk_")
+#-----------------------------------------------------------------------------------------------------------------------
 
 
 rule cal_score:
@@ -104,8 +115,10 @@ rule cal_score:
         vcf = rules.ms2vcf.output.vcf,
         #ref_list = output_dir + "/" + str(seed_list[0]) + "/" + output_prefix + ".ref.ind.list",
         #tgt_list = output_dir + "/" + str(seed_list[0]) + "/" + output_prefix + ".tgt.ind.list",
-        ref_list = rules.ms2vcf.output.ss_ref,
-        tgt_list = rules.ms2vcf.output.ss_tgt,
+       # ref_list = rules.ms2vcf.output.ss_ref,
+       # tgt_list = rules.ms2vcf.output.ss_tgt,
+	ref_list = rules.ms_ind_lists.output.ss_ref,
+	tgt_list = rules.ms_ind_lists.output.ss_tgt,
     output:
         score = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sim1src.sstar.scores",
     params:
