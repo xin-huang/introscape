@@ -21,6 +21,6 @@ demes_file: config/demog/HumanNeanderthal_4G21_no_introgression.yaml
 sstar_ms_params: {"true": {"yaml": "./config/demog/HumanNeanderthal_4G21_no_introgression.yaml", samples: [0, 0, 2, 216]}}
 scenarios: ["true"]
 score_seqlen: 50000
-
+ms_seq_len: 50000 
 #-----------------------------------------------------------------------------------------------------------------------
 

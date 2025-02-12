@@ -38,9 +38,11 @@ src_id = config["src_id"]
 
 snp_num_list = np.arange(25,705,5)
 quantile_list = config["quantiles"]
+ms_seq_len = config["ms_seq_len"]
 
 output_dir = f'results/data/{params_set}/{demog_id}/nref_{nref}/ntgt_{ntgt}'
 sstar_output_dir = f'results/sstar/{params_set}/{demog_id}/nref_{nref}/ntgt_{ntgt}'
+
 #output folder for the simulations used to compute the sstar model
 sstar_output_dir_simulation = os.path.join(sstar_output_dir, "simulation")
 

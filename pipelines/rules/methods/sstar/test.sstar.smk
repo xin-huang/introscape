@@ -16,7 +16,7 @@ rule mut_rec_combination:
     output:
         rates = sstar_output_dir_simulation + "/{scenario}/snps/rates.combination",
     params:
-        seq_len = 50000,
+        seq_len = config.get("ms_seq_len", 50000),
         mut_rate = config["mut_rate"],
         rec_rate = config["rec_rate"],
     resources: time_min=60, mem_mb=5000, cpus=1,
@@ -45,9 +45,8 @@ rule simulate_glm_data:
         "benchmarks/sstar/msglm.{scenario}.{params_set}.{demog}.{nref}.{ntgt}.{snp_num}.benchmark.txt",
     params:
         nsamp = lambda wildcards: 2*(int(wildcards.nref)+int(1)),
-        #nreps = 10,
         nreps = 20000,
-        seq_len = 50000,
+        seq_len = config.get("ms_seq_len", 50000),
         ms_exec = config["ms_exec"],
         ms_params = lambda wildcards: demes.to_ms(demes.load(new_params[wildcards.scenario]["yaml"]), N0=1000, samples=new_params[wildcards.scenario]["samples"]),
     resources: time_min=60, mem_mb=5000, cpus=1,
@@ -87,7 +86,7 @@ rule ms2vcf:
         "benchmarks/sstar/ms2vcf.{scenario}.{params_set}.{demog}.{nref}.{ntgt}.{snp_num}.benchmark.txt",
     params:
         nsamp = lambda wildcards: 2*(int(wildcards.nref)+int(1)),
-        seq_len = 50000,
+        seq_len = config.get("ms_seq_len", 50000),
         ploidy = config["ploidy"]
     resources: 
         time = lambda wildcards: 360 if (int(wildcards.snp_num) < 340) else 1000,
@@ -107,7 +106,7 @@ rule cal_score:
     output:
         score = 'results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}' +"/simulation/{scenario}/snps/{snp_num}/sim1src.sstar.scores",
     params:
-        seq_len = 50000,
+        seq_len = config.get("ms_seq_len", 50000),
     conda:
         "../../../envs/sstar-env.yaml",
     benchmark:
