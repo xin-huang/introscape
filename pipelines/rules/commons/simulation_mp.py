@@ -8,6 +8,7 @@ import pyranges as pr
 import multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor as Pool
 import argparse
+import sys
 #-----------------------------------------------------------------------------------------------------------------------
 
 parser = argparse.ArgumentParser(description="input params")
@@ -95,6 +96,12 @@ migtable2.clear() # empty
 for mrow in migtable:
     if (mrow.dest==src_name) and (mrow.source==tgt_name):
         migtable2.append(mrow)
+#-----------------------------------------------------------------------------------------------------------------------
+# if no migrations b/n source & target, eg when simulating with no_introgression demes model to test the tools, could exit here
+if migtable2.num_rows == 0:
+    print("no migrations between source and target")
+    sys.exit()
+#-----------------------------------------------------------------------------------------------------------------------
 #the new tree sequence stores only the relevant migrations (involving source and target)
 ts_dump_mig.migrations.replace_with(migtable2)
 ts_dump_sequence_mig = ts_dump_mig.tree_sequence()
