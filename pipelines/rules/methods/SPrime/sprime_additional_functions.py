@@ -1,3 +1,6 @@
+import pybedtools
+import numpy as np
+
 def create_map_file(x, y, map_file = "sim.map"):
     with open(map_file, 'w') as f:
         f.write("1\t.\t0.0\t0\n")

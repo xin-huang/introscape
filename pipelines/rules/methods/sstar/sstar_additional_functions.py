@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import pybedtools
+import numpy as np
 
 def list_subdirectories(directory):
     subdirectories = []
