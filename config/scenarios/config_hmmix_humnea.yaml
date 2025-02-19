@@ -1,0 +1,21 @@
+#-----------------------------------------------------------------------------------------------------------------------
+output_prefix: hmmix_humnea
+ploidy: 2 # diploid
+nref: 108 # number of samples in reference population (here YRI)
+ntgt: 99 # number of samples in target population (here CEU)
+ref_id: YRI
+tgt_id: CEU
+src_id: Nea
+rec_rate: 1.0e-8
+mut_rate: 1.2e-8
+seq_len: 25000000 # 25Mb
+#binary: True # which is recommended binary mutations or not? test w/out binary mutations
+win_step: 10000 # default val for this?
+nrep: 10 # testing, default val?
+
+cutoff_num: 10 # for the precision-recall curves
+demog_id: HumanNeanderthal_4G21
+demes_file: config/demog/HumanNeanderthal_4G21.yaml # msprime simns model w archaic introgression
+ 
+#-----------------------------------------------------------------------------------------------------------------------
+seed: 12345

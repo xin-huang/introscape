@@ -69,6 +69,8 @@ rule get_hmmix_scripts:
         mkdir -p {params.outdir}
         cd {params.outdir}
         git clone https://github.com/LauritsSkov/Introgression-detection
-	cd ../../
+	cd Introgression-detection
+	git checkout 6f7cff00e149f64b583641000ae0433af26c8cfe
+	cd ../../../
 	touch {output.download_flag}
         """

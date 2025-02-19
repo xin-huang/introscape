@@ -8,6 +8,7 @@ dependencies:
         - matplotlib=3.8.4
         - scipy
         - numpy
+        - pandas
         - bcftools=1.20
         - vcftools=0.1.16
         - python=3.9.19
