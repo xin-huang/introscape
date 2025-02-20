@@ -33,6 +33,7 @@ parser.add_argument("--ref_id", type=str, help="ref_id")
 parser.add_argument("--src_id", type=str, help="src_id")
 
 parser.add_argument("--output_prefix", type=str, help="output_prefix")
+parser.add_argument("--cutoff_num", type=int, help="cutoff_num")
 
 args = parser.parse_args()
 
@@ -55,6 +56,10 @@ src_id = args.src_id
 out_outgroup_file = args.out_outgroup_file
 out_prob_file = args.out_prob_file
 output_prefix = args.output_prefix
+#-----------------------------------------------------------------------------------------------------------------------
+cutoff_num = args.cutoff_num
+cutoff_list = np.round(np.linspace(0, 1, cutoff_num, endpoint=False), 2)
+cutoff_list = np.append(cutoff_list, [0.99, 0.999])
 #-----------------------------------------------------------------------------------------------------------------------
 
 with open(inref_list, 'r') as file:
@@ -81,13 +86,19 @@ make_mutation_rate(out_outgroup_file , os.path.join(out_folder, "mutrates_outgro
 new_HMM = HMMParam([ref_id, src_id], [0.5, 0.5], [[0.99,0.01],[0.02,0.98]], [0.03, 0.3])
 write_HMM_to_file(new_HMM, os.path.join(out_folder,'hmm_guesses.json'))
 
+print(new_HMM) # check has got here
+
 infiles, trained_files = train_hmm_individuals(comma_separated_tgt,  os.path.join(out_folder,'hmm_guesses.json'), os.path.join(out_folder, "mutrates_outgroup1.out"), out_folder=out_folder, window_size=1000, haploid=False, weights=None)
 
 all_segments = decode_hmm_individuals(comma_separated_tgt, trained_files, os.path.join(out_folder, "mutrates_outgroup1.out"),  out_folder=out_folder, window_size=1000, haploid=False, weights=None)
 
+print(all_segments) # check
+
 all_segments.to_csv(out_prob_file, index=False)
 
 inferred_tract_files = process_output(all_segments, out_folder, output_prefix, src_id, cutoff_list=cutoff_list, return_filenames=True)
+
+print(inferred_tract_files) # check
 
 for inferred_tracts in inferred_tract_files:
     precision, recall = cal_accuracy(in_true_tracts, inferred_tracts[1])

@@ -28,7 +28,8 @@ rule process_test_data:
         ref_set = ref_set,
         ref_id = config["ref_id"],
         src_id = config["src_id"],
-	output_prefix = config["output_prefix"]
+	output_prefix = config["output_prefix"],
+	cutoff_num = config["cutoff_num"]
     shell:
         """    
         python pipelines/rules/methods/hmmix/process_hmmix.py \
@@ -43,5 +44,6 @@ rule process_test_data:
             --ref_set '{params.ref_set}' \
             --ref_id '{params.ref_id}' \
             --src_id '{params.src_id}' \
-            --output_prefix '{params.output_prefix}' 
+            --output_prefix '{params.output_prefix}' \
+            --cutoff_num {params.cutoff_num} 
         """
