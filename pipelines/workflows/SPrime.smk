@@ -34,8 +34,10 @@ src_id = config["src_id"]
 
 map_file_config = None
 
-np.random.seed(config["seed"])
-seed_list = np.random.random_integers(1, 2**31, nrep)
+#np.random.seed(config["seed"])
+#seed_list = np.random.random_integers(1, 2**31, nrep)
+
+seed_list = config["seed"] # testing
 
 #thresholds for sprime
 threshold_list = config["threshold_list"]
@@ -52,12 +54,15 @@ sprime_output_dir = f'results/sprime/{params_set}/{demog_id}/nref_{nref}/ntgt_{n
 
 rule all:
     input:
-        expand(sprime_output_dir + "/{demog}/nref_{nref}/ntgt_{ntgt}/{seed}/{threshold}/sprime.1src.out.{threshold}.bed", demog=demog_id, nref=nref, ntgt=ntgt, seed = seed_list, threshold = threshold_list)
+        expand(sprime_output_dir + "/{demog}/nref_{nref}/ntgt_{ntgt}/{seed}/{threshold}/sprime.1src.out.{threshold}.bed", demog=demog_id, nref=nref, ntgt=ntgt, seed = seed_list, threshold = threshold_list),
+        expand(sprime_output_dir + "/{demog}/nref_{nref}/ntgt_{ntgt}/{seed}/{threshold}/sprime.1src.out.{threshold}.accuracy", demog=demog_id, nref=nref, ntgt=ntgt, seed = seed_list, threshold = threshold_list),
+	expand(sprime_output_dir + "/{demog}/nref_{nref}/ntgt_{ntgt}/{seed}/sprime_accuracy.txt", demog=demog_id, nref=nref, ntgt=ntgt, seed = seed_list)
+
 
 
 ##### Modules #####
 
 
-include: "../rules/commons/simulation_mp_extended.smk"
+#include: "../rules/commons/simulation_mp_extended.smk"
 include: "../rules/methods/SPrime/test.SPrime.smk"
 #include: "../rules/commons/plot.smk"

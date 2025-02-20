@@ -56,3 +56,21 @@ rule sprime_process_output:
        precision, recall = cal_accuracy(input.true_tracts, output.inferred_tracts)
        with open(output.accuracy, 'w') as o:
            o.write(f'{wildcards.demog}\tnref_{wildcards.nref}_ntgt_{wildcards.ntgt}\t{wildcards.threshold}\t{precision}\t{recall}\n')
+
+
+rule sprime_accuracy:
+    input:
+        accuracy_files = expand(sprime_output_dir + "/{demog}/nref_{nref}/ntgt_{ntgt}/{seed}/{threshold}/sprime.1src.out.{threshold}.accuracy", demog=demog_id, nref=nref, ntgt=ntgt, seed=seed_list, threshold=threshold_list),
+    output:
+        accuracy_table = os.path.join(sprime_output_dir + "{demog}/nref_{nref}/ntgt_{ntgt}/{seed}/sprime_accuracy.txt"),
+    log:
+        "logs/sprime/sprime_accuracy.{demog}.{nref}.{ntgt}.{seed}.log",
+    benchmark:
+        "benchmarks/sprime/sprime_accuracy.{demog}.{nref}.{ntgt}.{seed}.benchmark.txt",
+    resources: time_min=60, mem_mb=2000, cpus=1,
+    threads: 1,
+    shell:
+        """
+        cat {input.accuracy_files} | sed '1idemography\\tscenario\\tsample\\tcutoff\\tprecision\\trecall' > {output.accuracy_table}
+        """
+
