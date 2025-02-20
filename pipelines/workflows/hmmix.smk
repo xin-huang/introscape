@@ -38,9 +38,11 @@ if binary:
 else:
     ref_set = ["A", "C", "G", "T"]
 
-
-np.random.seed(config["seed"])
-seed_list = np.random.random_integers(1, 2**31, nrep)
+#-----------------------------------------------------------------------------------------------------------------------
+# commenting out to test
+#np.random.seed(config["seed"])
+#seed_list = np.random.random_integers(1, 2**31, nrep)
+#-----------------------------------------------------------------------------------------------------------------------
 
 
 output_dir = f'results/data/{params_set}/{demog_id}/nref_{nref}/ntgt_{ntgt}'
@@ -51,9 +53,9 @@ skov_output_dir = f'results/SkovHMM/{params_set}/{demog_id}/nref_{nref}/ntgt_{nt
 ##### Target rules #####
 
 
-rule all:
-    input:
-        expand(skov_output_dir + "/{seed}/output_ref_vs.txt", demog_id=demog_id, nref=nref, ntgt=ntgt, seed = seed_list)
+#rule all:
+#    input:
+#        expand(skov_output_dir + "/{seed}/output_ref_vs.txt", demog_id=demog_id, nref=nref, ntgt=ntgt, seed = seed_list)
 
 
 ##### Modules #####
@@ -64,7 +66,16 @@ rule all:
 #include: "../rules/commons/plot.smk"
 
 #-----------------------------------------------------------------------------------------------------------------------
-# testing
-include: "../rules/commons/simulation_mp_extended_short.smk"
+# testing test.hmmix_short.smk w. previous version of skov helper scripts
+
+seed_list = config["seed"]
+
+rule all:
+    input:
+        expand(skov_output_dir + "/{seed}/output_ref_vs.txt", params_set=params_set, demog_id=demog_id, nref=nref, ntgt=ntgt, seed = seed_list),
+        expand(skov_output_dir + "/{seed}/probabilities.txt", params_set=params_set, demog_id=demog_id, nref=nref, ntgt=ntgt, seed = seed_list)
+
+
+#include: "../rules/commons/simulation_mp_extended_short.smk"
 include: "../rules/methods/hmmix/test.hmmix_short.smk"
 

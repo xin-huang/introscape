@@ -27,7 +27,8 @@ rule process_test_data:
         skov_output_dir = skov_output_dir,
         ref_set = ref_set,
         ref_id = config["ref_id"],
-        src_id = config["src_id"]
+        src_id = config["src_id"],
+	output_prefix = config["output_prefix"]
     shell:
         """    
         python pipelines/rules/methods/hmmix/process_hmmix.py \
@@ -39,7 +40,8 @@ rule process_test_data:
             --seed {wildcards.seed} \
             --out_outgroup_file '{output.outgroup_file}' \
             --out_prob_file '{output.prob_file}' \
-            --ref_set {params.ref_set} \
+            --ref_set '{params.ref_set}' \
             --ref_id '{params.ref_id}' \
-            --src_id '{params.src_id}' 
+            --src_id '{params.src_id}' \
+            --output_prefix '{params.output_prefix}' 
         """

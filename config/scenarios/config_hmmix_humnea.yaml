@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------------------------------------------------
-output_prefix: hmmix_humnea
+output_prefix: humnea #hmmix_humnea
 ploidy: 2 # diploid
 nref: 108 # number of samples in reference population (here YRI)
 ntgt: 99 # number of samples in target population (here CEU)
@@ -18,4 +18,4 @@ demog_id: HumanNeanderthal_4G21
 demes_file: config/demog/HumanNeanderthal_4G21.yaml # msprime simns model w archaic introgression
  
 #-----------------------------------------------------------------------------------------------------------------------
-seed: 12345
+seed: 86632460  #12345

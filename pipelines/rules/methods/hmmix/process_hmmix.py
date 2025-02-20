@@ -32,6 +32,8 @@ parser.add_argument("--ref_set", type=list, help="ref_set")
 parser.add_argument("--ref_id", type=str, help="ref_id")
 parser.add_argument("--src_id", type=str, help="src_id")
 
+parser.add_argument("--output_prefix", type=str, help="output_prefix")
+
 args = parser.parse_args()
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -52,6 +54,7 @@ src_id = args.src_id
 # outputs : outgroup_file, prob_file
 out_outgroup_file = args.out_outgroup_file
 out_prob_file = args.out_prob_file
+output_prefix = args.output_prefix
 #-----------------------------------------------------------------------------------------------------------------------
 
 with open(inref_list, 'r') as file:
@@ -62,7 +65,7 @@ with open(intgt_list, 'r') as file:
 
 ref_lines_comma = ','.join([line.strip() for line in ref_lines])
 
-out_folder = os.path.join(skov_output_dir, seed)
+out_folder = os.path.join(skov_output_dir, f"{seed}")
 
 with open(os.path.join(out_folder,'comma_separated_refinds.txt'), 'w') as output_file:
     output_file.write(ref_lines_comma)
