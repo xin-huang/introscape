@@ -2,7 +2,7 @@ import os
 import numpy as np
 import random
 
-seed = random.randint(1, 2147483648 + 1) # specify seed like this?
+#seed = random.randint(1, 2147483648 + 1) # specify seed like this? # comment out to test
 
 try:
     libr_dir = os.environ["CONDA_PREFIX"] + "/lib/R/library"
@@ -47,7 +47,8 @@ sstar_output_dir = f'results/sstar/{params_set}/{demog_id}/nref_{nref}/ntgt_{ntg
 sstar_output_dir_simulation = os.path.join(sstar_output_dir, "simulation")
 
 #only in case that no new data is simulated
-seed_list = np.random.random_integers(1, 2**31, nrep)
+#seed_list = np.random.random_integers(1, 2**31, nrep) # comment out to test
+seed_list = 86632460
 
 new_params = config["sstar_ms_params"]
 scenario_list = config["scenarios"]
@@ -76,15 +77,19 @@ except KeyError:
 
 #-----------------------------------------------------------------------------------------------------------------------
 
+#rule all:
+#    input:
+#        expand("{output_dir}/{seed}/{output_prefix}.ts", output_dir=output_dir, seed=seed, output_prefix=output_prefix),
+#        expand("{output_dir}/{seed}/{output_prefix}.vcf.gz", output_dir=output_dir, seed=seed, output_prefix=output_prefix),
+#        expand("{output_dir}/{seed}/{output_prefix}.truth.tracts.bed", output_dir=output_dir, seed=seed, output_prefix=output_prefix),
+#	sstar_output_dir + "/sstar_1src_accuracy.txt"
+
 rule all:
     input:
-        expand("{output_dir}/{seed}/{output_prefix}.ts", output_dir=output_dir, seed=seed, output_prefix=output_prefix),
-        expand("{output_dir}/{seed}/{output_prefix}.vcf.gz", output_dir=output_dir, seed=seed, output_prefix=output_prefix),
-        expand("{output_dir}/{seed}/{output_prefix}.truth.tracts.bed", output_dir=output_dir, seed=seed, output_prefix=output_prefix),
-	sstar_output_dir + "/sstar_1src_accuracy.txt"
+        sstar_output_dir + "/sstar_1src_accuracy.txt"
 
 #include: "../rules/commons/install_external_tools.smk"
 #include: "../rules/commons/simulation_mp_extended.smk" # tested & executes
-include: "../rules/commons/simulation_mp_extended_short.smk"
+#include: "../rules/commons/simulation_mp_extended_short.smk"
 include: "../rules/methods/sstar/test.sstar.smk"
 

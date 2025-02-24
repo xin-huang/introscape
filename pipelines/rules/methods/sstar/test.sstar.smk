@@ -231,12 +231,15 @@ rule sstar_process_output:
             o.write(f'{wildcards.demog}\t{wildcards.scenario}\tnref_{wildcards.nref}_ntgt_{wildcards.ntgt}\t{wildcards.quantile}\t{precision}\t{recall}\n')
 
 
+# specifying input like this did not work
+#accuracy_files = expand("results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}" + "/{seed}/{scenario}/sstar.1src.quantile.{quantile}.out.accuracy",nref=nref, ntgt=ntgt, seed=seed_list, quantile=quantile_list, scenario=scenario_list, params_set=params_set, demog=demog_id),
+
+ 
 rule accuracy_summary:
     input:
-        accuracy_files = expand("results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}" + "/{seed}/{scenario}/sstar.1src.quantile.{quantile}.out.accuracy",
-                                nref=nref, ntgt=ntgt, seed=seed_list, quantile=quantile_list, scenario=scenario_list, params_set=params_set, demog=demog_id),
+        accuracy_files = expand(sstar_output_dir + "/{seed}/{scenario}/sstar.1src.quantile.{quantile}.out.accuracy",seed=seed_list,scenario=scenario_list, quantile=quantile_list),
     output:
-        accuracy_table = sstar_output_dir + "/sstar_1src_accuracy.txt",
+        accuracy_table = os.path.join(sstar_output_dir + "/sstar_1src_accuracy.txt"),
     resources: time_min=60, mem_mb=2000, cpus=1,
     threads: 1,
     log:
