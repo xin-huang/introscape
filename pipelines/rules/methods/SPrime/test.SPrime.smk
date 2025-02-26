@@ -1,8 +1,14 @@
 import numpy as np
 import os
+import sys
 
 from sprime_additional_functions import *
 
+#sys.path.append("../../commons")
+sys.path.append("pipelines/rules/commons")
+#print("sys.path:", sys.path)
+
+from evaluate_utils import *
 
 '''
 rule all:
