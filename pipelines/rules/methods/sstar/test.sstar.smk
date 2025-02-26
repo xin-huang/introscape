@@ -2,8 +2,12 @@ import os
 import demes
 import numpy as np
 import pandas as pd
+import sys
 
 from sstar_additional_functions import *
+
+sys.path.append("pipelines/rules/commons")
+from evaluate_utils import *
 
 
 '''
