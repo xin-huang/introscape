@@ -56,6 +56,7 @@ rule install_SPrime:
         mv tmp sprimepipeline/pub.pipeline.pbs/tools/score_summary.r
         """
 
+# skov hmmix helper scripts, commit 7ef9db313922fd2fde4de79daa0c0a7813b7958a, Date:   Mon Mar 18 22:21:52 2024 -0700
 rule get_hmmix_scripts:
     output:
         download_flag = "resources/flags/.skovscripts.downloaded"
@@ -70,7 +71,7 @@ rule get_hmmix_scripts:
         cd {params.outdir}
         git clone https://github.com/LauritsSkov/Introgression-detection
 	cd Introgression-detection
-	git checkout 6f7cff00e149f64b583641000ae0433af26c8cfe
+	git checkout 7ef9db313922fd2fde4de79daa0c0a7813b7958a
 	cd ../../../
 	touch {output.download_flag}
         """

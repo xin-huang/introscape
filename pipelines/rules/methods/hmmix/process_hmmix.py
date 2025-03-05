@@ -7,7 +7,7 @@ import sys
 from hmmix_additional_functions import *
 
 # skov helper functions from git clone https://github.com/LauritsSkov/Introgression-detection
-skov_dir = f"resources/skov_scripts/Introgression-detection/src/"
+skov_dir = "resources/skov_scripts/Introgression-detection/src/"
 sys.path.append(skov_dir)
 
 from make_mutationrate import make_mutation_rate
@@ -34,6 +34,9 @@ parser.add_argument("--src_id", type=str, help="src_id")
 
 parser.add_argument("--output_prefix", type=str, help="output_prefix")
 parser.add_argument("--cutoff_num", type=int, help="cutoff_num")
+parser.add_argument("--demog_id", type=str, help="demog_id")
+parser.add_argument("--nref", type=int, help="nref")
+parser.add_argument("--ntgt", type=int, help="ntgt")
 
 args = parser.parse_args()
 
@@ -51,11 +54,14 @@ seed = args.seed
 ref_set = args.ref_set
 ref_id = args.ref_id
 src_id = args.src_id
+demog_id = args.demog_id
 #-----------------------------------------------------------------------------------------------------------------------
 # outputs : outgroup_file, prob_file
 out_outgroup_file = args.out_outgroup_file
 out_prob_file = args.out_prob_file
 output_prefix = args.output_prefix
+nref = args.nref
+ntgt = args.ntgt
 #-----------------------------------------------------------------------------------------------------------------------
 cutoff_num = args.cutoff_num
 cutoff_list = np.round(np.linspace(0, 1, cutoff_num, endpoint=False), 2)

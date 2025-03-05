@@ -234,10 +234,6 @@ rule sstar_process_output:
         with open(output.accuracy, 'w') as o:
             o.write(f'{wildcards.demog}\t{wildcards.scenario}\tnref_{wildcards.nref}_ntgt_{wildcards.ntgt}\t{wildcards.quantile}\t{precision}\t{recall}\n')
 
-
-# specifying input like this did not work
-#accuracy_files = expand("results/sstar/{params_set}/{demog}/nref_{nref}/ntgt_{ntgt}" + "/{seed}/{scenario}/sstar.1src.quantile.{quantile}.out.accuracy",nref=nref, ntgt=ntgt, seed=seed_list, quantile=quantile_list, scenario=scenario_list, params_set=params_set, demog=demog_id),
-
  
 rule accuracy_summary:
     input:
