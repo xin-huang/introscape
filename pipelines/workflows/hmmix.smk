@@ -77,5 +77,7 @@ rule all:
 
 
 #include: "../rules/commons/simulation_mp_extended_short.smk"
-include: "../rules/methods/hmmix/test.hmmix_short.smk"
+#include: "../rules/methods/hmmix/test.hmmix_short.smk" # works with git checkout 7ef9db313922fd2fde4de79daa0c0a7813b7958a (skov helper scripts)
+# test latest version of skov helper scripts
+include: "../rules/methods/hmmix/test.hmmix_short_v0.8.2.smk"
 
