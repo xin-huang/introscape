@@ -4,7 +4,7 @@ import sys
 
 #-----------------------------------------------------------------------------------------------------------------------
 
-from hmmix_additional_functions_v0.8.2 import *
+from hmmix_additional_functions_v082 import *
 
 # skov helper functions from git clone https://github.com/LauritsSkov/Introgression-detection
 skov_dir = "resources/skov_scripts/Introgression-detection/src/"
