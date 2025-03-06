@@ -11,7 +11,7 @@ sys.path.append(skov_dir)
 
 
 #fn DecodeModel -> replaced w Calculate_Posterior_probabillities
-from hmm_functions import TrainModel, HMMParam, get_default_HMM_parameters, write_HMM_to_file, read_HMM_parameters_from_file, Write_Decoded_output, Calculate_Posterior_probabillities, Emission_probs_poisson
+from hmm_functions import TrainModel, HMMParam, get_default_HMM_parameters, write_HMM_to_file, read_HMM_parameters_from_file, Write_Decoded_output, Calculate_Posterior_probabillities, Emission_probs_poisson, Convert_genome_coordinates, Write_posterior_probs
 # create_test_data -> simulate_path, write_data
 from make_test_data import simulate_path, write_data
 from helper_functions import *
@@ -257,6 +257,7 @@ def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weigh
         try:
             obs, chroms, starts, variants, mutrates, weights  = Load_observations_weights_mutrates(obs, weights, mutrates, window_size, haploid)
             hmm_parameters = read_HMM_parameters_from_file(param)
+            CHROMOSOME_BREAKPOINTS = [x for x in find_runs(chroms)]
 
             print('-' * 40)
             print(hmm_parameters)
@@ -274,9 +275,11 @@ def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weigh
             #segments = DecodeModel(obs, chroms, starts, variants, mutrates, weights, hmm_parameters)
             #Write_Decoded_output(out, segments, obs, admixpop, extrainfo)
 
-            # Q - DecodeModel replaced by only Calculate_Posterior_probabillities, or also need Emission_probs_poissn?
             emissions = Emission_probs_poisson(hmm_parameters.emissions, obs, weights, mutrates)
-            segments = Calculate_Posterior_probabillities(emissions, hmm_parameters)
+            posterior_probs = Calculate_Posterior_probabillities(emissions, hmm_parameters)
+            # need to specify path hybrid/viterbi/pmap?
+            Write_posterior_probs(chroms, starts, weights, mutrates, posterior_probs, path, variants, hmm_parameters, posterior_probs)
+            segments = Convert_genome_coordinates(window_size, CHROMOSOME_BREAKPOINTS, starts, variants, posterior_probs, path, hmm_parameters, weights, mutrates, obs)
 
             Write_Decoded_output(out, segments, obs, None, False)
             if haploid:
