@@ -254,7 +254,7 @@ def train_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weight
 
 
 
-def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weights=None):
+def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weights=None, hybrid=-1, viterbi=False):
         try:
             obs, chroms, starts, variants, mutrates, weights  = Load_observations_weights_mutrates(obs, weights, mutrates, window_size, haploid)
             hmm_parameters = read_HMM_parameters_from_file(param)
@@ -292,10 +292,10 @@ def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weigh
                     print('> Decode using viterbi algorithm') 
                     print('-' * 40)
                     path = Viterbi_path(emissions, hmm_parameters)
-            else:
-                print('> Decode with posterior decoding')
-                print('-' * 40) 
-                path = PMAP_path(posterior_probs)
+                else:
+                    print('> Decode with posterior decoding')
+                    print('-' * 40) 
+                    path = PMAP_path(posterior_probs)
 
             #Write_posterior_probs(chroms, starts, weights, mutrates, posterior_probs, path, variants, hmm_parameters, posterior_probs)
             segments = Convert_genome_coordinates(window_size, CHROMOSOME_BREAKPOINTS, starts, variants, posterior_probs, path, hmm_parameters, weights, mutrates, obs)
@@ -311,7 +311,7 @@ def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weigh
             #return probabilities
             return segments_df
         except Exception as e:
-            print("decoding of model failed - probably due to no derived observations!", e)
+            print("decoding of model failed -", e)
             segments_df = pd.DataFrame()
             return segments_df
 
