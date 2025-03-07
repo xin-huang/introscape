@@ -11,7 +11,8 @@ sys.path.append(skov_dir)
 
 
 #fn DecodeModel -> replaced w Calculate_Posterior_probabillities
-from hmm_functions import TrainModel, HMMParam, get_default_HMM_parameters, write_HMM_to_file, read_HMM_parameters_from_file, Write_Decoded_output, Calculate_Posterior_probabillities, Emission_probs_poisson, Convert_genome_coordinates, Write_posterior_probs,PMAP_path
+from hmm_functions import TrainModel, write_HMM_to_file, read_HMM_parameters_from_file, Write_Decoded_output, Calculate_Posterior_probabillities, PMAP_path, Viterbi_path, Hybrid_path, Convert_genome_coordinates, Write_posterior_probs, Make_inhomogeneous_transition_matrix, Simulate_from_transition_matrix, Write_inhomogeneous_transition_matrix, Emission_probs_poisson
+
 # create_test_data -> simulate_path, write_data
 from make_test_data import simulate_path, write_data
 from helper_functions import *
@@ -277,9 +278,26 @@ def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weigh
 
             emissions = Emission_probs_poisson(hmm_parameters.emissions, obs, weights, mutrates)
             posterior_probs = Calculate_Posterior_probabillities(emissions, hmm_parameters)
-            # need to specify path hybrid/viterbi/pmap?
-            path = PMAP_path(posterior_probs)
-            Write_posterior_probs(chroms, starts, weights, mutrates, posterior_probs, path, variants, hmm_parameters, posterior_probs)
+
+            if hybrid != -1:
+                if 0 <= hybrid <= 1:
+                    print(f'> Decode using hybrid algorithm with parameter: {hybrid}')
+                    print('-' * 40) 
+                    logged_posterior_probs = np.log(posterior_probs.T)
+                    path = Hybrid_path(emissions, hmm_parameters.starting_probabilities, hmm_parameters.transitions, logged_posterior_probs, hybrid)
+                else:
+                    sys.exit('\n\nERROR! Hybrid parameter must be between 0 and 1\n\n')
+            else:
+                if viterbi:
+                    print('> Decode using viterbi algorithm') 
+                    print('-' * 40)
+                    path = Viterbi_path(emissions, hmm_parameters)
+            else:
+                print('> Decode with posterior decoding')
+                print('-' * 40) 
+                path = PMAP_path(posterior_probs)
+
+            #Write_posterior_probs(chroms, starts, weights, mutrates, posterior_probs, path, variants, hmm_parameters, posterior_probs)
             segments = Convert_genome_coordinates(window_size, CHROMOSOME_BREAKPOINTS, starts, variants, posterior_probs, path, hmm_parameters, weights, mutrates, obs)
 
             Write_Decoded_output(out, segments, obs, None, False)
@@ -292,8 +310,8 @@ def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weigh
 
             #return probabilities
             return segments_df
-        except:
-            print("decoding of model failed - probably due to no derived observations!")
+        except Exception as e:
+            print("decoding of model failed - probably due to no derived observations!", e)
             segments_df = pd.DataFrame()
             return segments_df
 
