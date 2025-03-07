@@ -15,7 +15,8 @@ from make_mutationrate import make_mutation_rate
 #from hmm_functions import TrainModel, DecodeModel, HMMParam, read_HMM_parameters_from_file, get_default_HMM_parameters, write_HMM_to_file
 
 from make_test_data import simulate_path, write_data
-from hmm_functions import TrainModel, HMMParam, get_default_HMM_parameters, write_HMM_to_file, read_HMM_parameters_from_file, Write_Decoded_output, Calculate_Posterior_probabillities, Emission_probs_poisson
+from hmm_functions import TrainModel, HMMParam, write_HMM_to_file, read_HMM_parameters_from_file, Write_Decoded_output, Calculate_Posterior_probabillities, PMAP_path, Viterbi_path, Hybrid_path, Convert_genome_coordinates, Write_posterior_probs, Make_inhomogeneous_transition_matrix, Simulate_from_transition_matrix, Write_inhomogeneous_transition_matrix, Emission_probs_poisson
+
 
 from helper_functions import Load_observations_weights_mutrates, handle_individuals_input, handle_infiles, combined_files
 from bcf_vcf import make_out_group, make_ingroup_obs
