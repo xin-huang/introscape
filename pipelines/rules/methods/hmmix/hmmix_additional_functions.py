@@ -6,7 +6,7 @@ import pybedtools
 import sys
 
 # path to skov helper scripts for hmmix
-skov_dir = f"resources/skov_scripts/Introgression-detection/src/"
+skov_dir = "resources/skov_scripts/Introgression-detection/src/"
 sys.path.append(skov_dir)
 
 
@@ -205,7 +205,7 @@ def train_hmm_individuals(tgt_ind_list, param, mutrates,  out_folder="", window_
     outfile_names = []
     infile_names = []
     for tgt_ind in tgt_ind_list:
-        filename_start = "output_tgt_vs." + str(tgt_ind)
+        filename_start = f"output_tgt_vs.{str(tgt_ind)}"
         infile = os.path.join(out_folder,  filename_start + ".txt")
         outfile = os.path.join(out_folder,  filename_start + "trained.json")
         train_hmm(infile, param, mutrates, outfile, window_size=1000, haploid=False, weights=None)
@@ -217,7 +217,7 @@ def decode_hmm_individuals(comma_separated_tgt, trained_files,  mutrates, out_fo
     all_segments = []
     for outp_train_pair in zip(comma_separated_tgt, trained_files):
         print(outp_train_pair)
-        filename_start = "output_tgt_vs." + str(outp_train_pair[0])
+        filename_start = f"output_tgt_vs.{str(outp_train_pair[0])}"
         infile = os.path.join(out_folder , filename_start +  ".txt")
 
         outfile = os.path.join(out_folder , filename_start + ".decoded.txt")
@@ -226,9 +226,9 @@ def decode_hmm_individuals(comma_separated_tgt, trained_files,  mutrates, out_fo
         new_df = decode_hmm(infile, outp_train_pair[1], mutrates, outfile, window_size=1000, haploid=False, weights=None)
         new_df["sample"] = outp_train_pair[0]
         all_segments.append(new_df)
-    all_segments = pd.concat(all_segments)
+    #all_segments = pd.concat(all_segments)
 
-    return all_segments
+    return pd.concat(all_segments)
 
 
 def train_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weights=None):
@@ -248,8 +248,8 @@ def train_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weight
 
         hmm_parameters = TrainModel(obs, mutrates, weights, hmm_parameters)
         write_HMM_to_file(hmm_parameters, out)
-    except:
-        print("training of model failed - probably due to no derived observations!")
+    except Exception as e:
+        print("training of model failed -", e)
 
 
 
@@ -284,8 +284,8 @@ def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weigh
 
             #return probabilities
             return segments_df
-        except:
-            print("decoding of model failed - probably due to no derived observations!")
+        except Exception as e:
+            print("decoding of model failed -", e)
             segments_df = pd.DataFrame()
             return segments_df
 
