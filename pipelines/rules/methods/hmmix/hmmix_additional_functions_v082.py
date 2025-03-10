@@ -4,6 +4,7 @@ import pandas as pd
 from collections import defaultdict
 import pybedtools
 import sys
+import pickle
 
 # path to skov helper scripts for hmmix
 skov_dir = "resources/skov_scripts/Introgression-detection/src/"
@@ -132,7 +133,7 @@ def Load_observations_weights_mutrates(obs_file, weights_file, mutrates_file, wi
 
         if weights_file is None:
             #sys.exit(f'{obs_file} is empty! You need to provide a bed file!')
-            raise Exception(f'{obs_file} is empty! You need to provide a bed file!')
+            raise ValueError(f'{obs_file} is empty! You need to provide a bed file!')
 
         haplotypes[''] += 1
         callability = make_callability_from_bed(weights_file, window_size)
@@ -300,17 +301,19 @@ def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weigh
                     print('-' * 40) 
                     path = PMAP_path(posterior_probs)
 
-            #Write_posterior_probs(chroms, starts, weights, mutrates, posterior_probs, path, variants, hmm_parameters, posterior_probs)
+            Write_posterior_probs(chroms, starts, weights, mutrates, posterior_probs, path, variants, hmm_parameters, out)
             segments = Convert_genome_coordinates(window_size, CHROMOSOME_BREAKPOINTS, starts, variants, posterior_probs, path, hmm_parameters, weights, mutrates, obs)
-            print(path)
-            print(segments)
+            print('check path',path)
+            print('check segments', segments)
+            with open(f"{out}.test", "wb") as f:
+                pickle.dump((emissions, posterior_probs, segments), f)
 
             Write_Decoded_output(out, segments, obs, None, False)
             if haploid:
                 segments_df = pd.read_table(out + ".haploid.txt")
             else:
                 segments_df = pd.read_table(out + ".diploid.txt")
-            print(segments_df)
+            print('check segments df',segments_df)
 
 
             #return probabilities
@@ -530,9 +533,9 @@ def cal_accuracy(true_tracts, inferred_tracts):
         truth_tracts = pybedtools.BedTool(true_tracts).sort().merge()
         inferred_tracts =  pybedtools.BedTool(inferred_tracts).sort().merge()
 
-        total_inferred_tracts = sum([x.stop - x.start for x in (inferred_tracts)])
-        total_true_tracts =  sum([x.stop - x.start for x in (truth_tracts)])
-        true_positives = sum([x.stop - x.start for x in inferred_tracts.intersect(truth_tracts)])
+        total_inferred_tracts = sum(x.stop - x.start for x in (inferred_tracts))
+        total_true_tracts =  sum(x.stop - x.start for x in (truth_tracts))
+        true_positives = sum(x.stop - x.start for x in inferred_tracts.intersect(truth_tracts))
 
         if float(total_inferred_tracts) == 0: precision = np.nan
         else: precision = true_positives / float(total_inferred_tracts) * 100

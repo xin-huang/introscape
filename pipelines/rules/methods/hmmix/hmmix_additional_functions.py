@@ -131,7 +131,7 @@ def Load_observations_weights_mutrates(obs_file, weights_file, mutrates_file, wi
 
         if weights_file is None:
             #sys.exit(f'{obs_file} is empty! You need to provide a bed file!')
-            raise Exception(f'{obs_file} is empty! You need to provide a bed file!')
+            raise ValueError(f'{obs_file} is empty! You need to provide a bed file!')
 
         haplotypes[''] += 1
         callability = make_callability_from_bed(weights_file, window_size)
@@ -499,9 +499,9 @@ def cal_accuracy(true_tracts, inferred_tracts):
         truth_tracts = pybedtools.BedTool(true_tracts).sort().merge()
         inferred_tracts =  pybedtools.BedTool(inferred_tracts).sort().merge()
 
-        total_inferred_tracts = sum([x.stop - x.start for x in (inferred_tracts)])
-        total_true_tracts =  sum([x.stop - x.start for x in (truth_tracts)])
-        true_positives = sum([x.stop - x.start for x in inferred_tracts.intersect(truth_tracts)])
+        total_inferred_tracts = sum(x.stop - x.start for x in (inferred_tracts))
+        total_true_tracts =  sum(x.stop - x.start for x in (truth_tracts))
+        true_positives = sum(x.stop - x.start for x in inferred_tracts.intersect(truth_tracts))
 
         if float(total_inferred_tracts) == 0: precision = np.nan
         else: precision = true_positives / float(total_inferred_tracts) * 100
