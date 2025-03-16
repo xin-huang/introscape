@@ -544,7 +544,7 @@ def cal_accuracy(true_tracts, inferred_tracts):
 
         return precision, recall
 
-    except:
+    except Exception as e:
         return 0, 0
 
 
