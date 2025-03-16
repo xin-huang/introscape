@@ -32,9 +32,12 @@ def ms2vcf(ms_file, vcf_file, nsamp, seq_len, ploidy=2, ind_prefix="ms_"):
     header += "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" + "\t".join([ind_prefix + str(i) for i in range(int(nsamp/ploidy))])
 
     with open(ms_file, 'r') as f:
-        f.readline()
-        f.readline()
-        for l in f.readlines():
+        #f.readline()
+        #f.readline()
+        next(f)
+        next(f)
+        for l in f:
+        #for l in f.readlines():
             if l.startswith('//'):
                 i += 1
                 data.append({})

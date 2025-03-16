@@ -549,9 +549,10 @@ def cal_accuracy(true_tracts, inferred_tracts):
 
 
 
-def process_output(segments_df, outfolder, out_file_prefix, src_id, cutoff_list=[0.01, 0.25, 0.5, 0.75, 0.99], return_filenames=False):
+def process_output(segments_df, outfolder, out_file_prefix, src_id, cutoff_list=None, return_filenames=False):
     segments_df.loc[segments_df['state'] != src_id, 'mean_prob'] = 1 - segments_df.loc[segments_df['state'] != src_id, 'mean_prob']
-
+    if cutoff_list is None:
+        cutoff_list = [0.01, 0.25, 0.5, 0.75, 0.99]
     if return_filenames:
         filenames = []
 

@@ -40,22 +40,66 @@ def partition_into_partitions(lst, num_partitions):
 
 #-----------------------------------------------------------------------------------------------------------------------
 
+#def tree_batch_processing(args):
+#    tree_batches, tree_object, migration_tree_object, bed_list, tgt_id = args
+#    ts = tree_object.value
+#    migration_ts = migration_tree_object.value
+#    for m in migration_ts.migrations():
+#        # Tree-sequences are sorted by the left ends of the intervals
+#        # Can skip those tree-sequences are not overlapped with the interval of i.
+#        for tree_index in tree_batches:
+#            t = ts.at_index(tree_index)
+#            if m.left >= t.interval.right: continue
+#            if m.right <= t.interval.left: break # [l, r)
+#            for n in ts.samples(tgt_id):
+#                if t.is_descendant(n, m.node):
+#                    left = m.left if m.left > t.interval.left else t.interval.left
+#                    right = m.right if m.right < t.interval.right else t.interval.right
+#                    bed_list.append([1, int(left), int(right), f'tsk_{ts.node(n).individual}_{int(n%ploidy+1)}'])
+#    return True
+
+#def migration_batch_processing(args):
+#    tree_object, migration_batches, migration_tree_object, bed_list, tgt_id = args
+#    ts = tree_object.value
+#    migration_ts = migration_tree_object.value
+#    for migration_index in migration_batches:
+#        m = migration_ts.migrations()[migration_index]
+#        # Tree-sequences are sorted by the left ends of the intervals
+#        # Can skip those tree-sequences are not overlapped with the interval of i.
+#        for t in ts.trees():
+#            if m.left >= t.interval.right: continue
+#            if m.right <= t.interval.left: break # [l, r)
+#            for n in ts.samples(tgt_id):
+#                if t.is_descendant(n, m.node):
+#                    left = m.left if m.left > t.interval.left else t.interval.left
+#                    right = m.right if m.right < t.interval.right else t.interval.right
+#                    bed_list.append([1, int(left), int(right), f'tsk_{ts.node(n).individual}_{int(n%ploidy+1)}'])
+#    return True
+#-----------------------------------------------------------------------------------------------------------------------
+# refactor tree_batch_processing & migration_batch_processing
+def process_interval(ts, t, m, tgt_id, bed_list, ploidy):
+    if m.left >= t.interval.right:
+        return
+    if m.right <= t.interval.left:
+        return  # exit early; caller should break if applicable
+    for n in ts.samples(tgt_id):
+        if t.is_descendant(n, m.node):
+            left = m.left if m.left > t.interval.left else t.interval.left
+            right = m.right if m.right < t.interval.right else t.interval.right
+            bed_list.append([1, int(left), int(right), f'tsk_{ts.node(n).individual}_{int(n % ploidy + 1)}'])
+
 def tree_batch_processing(args):
     tree_batches, tree_object, migration_tree_object, bed_list, tgt_id = args
     ts = tree_object.value
     migration_ts = migration_tree_object.value
     for m in migration_ts.migrations():
-        # Tree-sequences are sorted by the left ends of the intervals
-        # Can skip those tree-sequences are not overlapped with the interval of i.
         for tree_index in tree_batches:
             t = ts.at_index(tree_index)
-            if m.left >= t.interval.right: continue
-            if m.right <= t.interval.left: break # [l, r)
-            for n in ts.samples(tgt_id):
-                if t.is_descendant(n, m.node):
-                    left = m.left if m.left > t.interval.left else t.interval.left
-                    right = m.right if m.right < t.interval.right else t.interval.right
-                    bed_list.append([1, int(left), int(right), f'tsk_{ts.node(n).individual}_{int(n%ploidy+1)}'])
+            if m.left >= t.interval.right:
+                continue
+            if m.right <= t.interval.left:
+                break  # stop processing further trees for this migration
+            process_interval(ts, t, m, tgt_id, bed_list, ploidy)
     return True
 
 def migration_batch_processing(args):
@@ -64,17 +108,14 @@ def migration_batch_processing(args):
     migration_ts = migration_tree_object.value
     for migration_index in migration_batches:
         m = migration_ts.migrations()[migration_index]
-        # Tree-sequences are sorted by the left ends of the intervals
-        # Can skip those tree-sequences are not overlapped with the interval of i.
         for t in ts.trees():
-            if m.left >= t.interval.right: continue
-            if m.right <= t.interval.left: break # [l, r)
-            for n in ts.samples(tgt_id):
-                if t.is_descendant(n, m.node):
-                    left = m.left if m.left > t.interval.left else t.interval.left
-                    right = m.right if m.right < t.interval.right else t.interval.right
-                    bed_list.append([1, int(left), int(right), f'tsk_{ts.node(n).individual}_{int(n%ploidy+1)}'])
+            if m.left >= t.interval.right:
+                continue
+            if m.right <= t.interval.left:
+                break
+            process_interval(ts, t, m, tgt_id, bed_list, ploidy)
     return True
+
 #-----------------------------------------------------------------------------------------------------------------------
 # read in simulated tree seq
 ts = tskit.load(inputts)
