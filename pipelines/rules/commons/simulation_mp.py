@@ -35,8 +35,8 @@ def create_final_tracts(tract_file):
 
 def partition_into_partitions(lst, num_partitions):
     partition_size = math.ceil(len(lst) / num_partitions)
-    partitions = [lst[i:i+partition_size] for i in range(0, len(lst), partition_size)]
-    return partitions
+    #partitions = [lst[i:i+partition_size] for i in range(0, len(lst), partition_size)]
+    return [lst[i:i+partition_size] for i in range(0, len(lst), partition_size)]
 
 #-----------------------------------------------------------------------------------------------------------------------
 

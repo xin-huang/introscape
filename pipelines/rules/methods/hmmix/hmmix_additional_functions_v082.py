@@ -324,8 +324,9 @@ def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weigh
             return segments_df
 
 
-def convert_to_bases_set(genotype, both_bases, ref_set= ["0", "1"]):
-
+def convert_to_bases_set(genotype, both_bases, ref_set=None):
+    if ref_set is None:
+        ref_set = ["0", "1"]
     return_genotype = 'NN'
     separator = None
 
