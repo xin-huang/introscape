@@ -155,11 +155,13 @@ ts_dump_sequence = ts_dump.tree_sequence()
 
 #we search for all nodes involving the relevant populations
 populations_not_to_remove = [src_name, tgt_name]
-individuals_not_to_remove = []
-for ind in ts.nodes():
-    if ind.population in populations_not_to_remove:
-        individuals_not_to_remove.append(ind.id)
-
+#individuals_not_to_remove = []
+#for ind in ts.nodes():
+#    if ind.population in populations_not_to_remove:
+#        individuals_not_to_remove.append(ind.id)
+individuals_not_to_remove = [
+    ind.id for ind in ts.nodes() if ind.population in populations_not_to_remove
+]
 
 #the tree sequence object without migrations can be simplified
 #the simplification contains only the relevant (source-target involving) information
