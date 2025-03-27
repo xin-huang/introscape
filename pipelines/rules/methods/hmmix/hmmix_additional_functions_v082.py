@@ -369,6 +369,8 @@ def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weigh
             with open(f"{out}.test", "wb") as f:
                 pickle.dump((emissions, posterior_probs, segments, obs), f)
             return segments
+        except Exception as e:
+            print("decoding of model failed -", e)
 
 
 # fails after pickle.dump step -> split fn here
@@ -388,24 +390,37 @@ def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weigh
 #    return segments_df
 #IndentationError: unexpected unindent
 
+#def decode_to_df(out, haploid=False):
+#        try:
+#            with open(f"{out}.test", "rb") as f:
+#                intermed_outp = pickle.load(f)
+#
+#            segments = intermed_outp[2]
+#            obs = intermed_outp[3]
+#            Write_Decoded_output(out, segments, obs, None, False)
+#
+#            if haploid:
+#                segments_df = pd.read_table(out + ".haploid.txt")
+#            else:
+#                segments_df = pd.read_table(out + ".diploid.txt")
+#
+#            return segments_df
+#        except Exception as e:
+#            print(f"decode_to_df failed: {e}")
+#IndentationError: unexpected unindent
+
+
 def decode_to_df(out, haploid=False):
-        try:
-            with open(f"{out}.test", "rb") as f:
-                intermed_outp = pickle.load(f)
-
-            segments = intermed_outp[2]
-            obs = intermed_outp[3]
-            Write_Decoded_output(out, segments, obs, None, False)
-
-            if haploid:
-                segments_df = pd.read_table(out + ".haploid.txt")
-            else:
-                segments_df = pd.read_table(out + ".diploid.txt")
-
-            return segments_df
-        except Exception as e:
-            print(f"decode_to_df failed: {e}")
-
+    with open(f"{out}.test", "rb") as f:
+        intermed_outp = pickle.load(f)
+    segments = intermed_outp[2]
+    obs = intermed_outp[3]
+    Write_Decoded_output(out, segments, obs, None, False)
+    if haploid:
+        segments_df = pd.read_table(out + ".haploid.txt")
+    else:
+        segments_df = pd.read_table(out + ".diploid.txt")
+    return segments_df
 
 
 # w/in fn def decode_hmm_individuals - calls decode_hmm fn => add in call to decode_to_df 
