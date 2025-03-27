@@ -374,20 +374,39 @@ def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weigh
 # fails after pickle.dump step -> split fn here
 # may be best to output obs as part of pickle dump => don't need to run fn load_observations.. again
 
-def decode_to_df(out):
-    with open(f"{out}.test", "wb") as f:
-        intermed_outp = pickle.load(f)
-    segments=intermed_outp[2]
-    obs=intermed_outp[3]
-    try:
-        Write_Decoded_output(out, segments, obs, None, False)
-        if haploid:
-            segments_df = pd.read_table(out + ".haploid.txt")
-        else:
-            segments_df = pd.read_table(out + ".diploid.txt")
-        return segments_df
-    except Exception as e:
-        print("fn write decoded output failed -", e)
+#def decode_to_df(out, haploid=False):
+#    with open(f"{out}.test", "rb") as f:
+#        intermed_outp = pickle.load(f)
+#        
+#    segments=intermed_outp[2]
+#    obs=intermed_outp[3]
+#    Write_Decoded_output(out, segments, obs, None, False)
+#    if haploid:
+#        segments_df = pd.read_table(out + ".haploid.txt")
+#    else:
+#        segments_df = pd.read_table(out + ".diploid.txt")
+#    return segments_df
+#IndentationError: unexpected unindent
+
+def decode_to_df(out, haploid=False):
+        try:
+            with open(f"{out}.test", "rb") as f:
+                intermed_outp = pickle.load(f)
+
+            segments = intermed_outp[2]
+            obs = intermed_outp[3]
+            Write_Decoded_output(out, segments, obs, None, False)
+
+            if haploid:
+                segments_df = pd.read_table(out + ".haploid.txt")
+            else:
+                segments_df = pd.read_table(out + ".diploid.txt")
+
+            return segments_df
+        except Exception as e:
+            print(f"decode_to_df failed: {e}")
+
+
 
 # w/in fn def decode_hmm_individuals - calls decode_hmm fn => add in call to decode_to_df 
 def decode_hmm_individuals(comma_separated_tgt, trained_files,  mutrates, out_folder="", window_size=1000, haploid=False, weights=None):
@@ -399,7 +418,7 @@ def decode_hmm_individuals(comma_separated_tgt, trained_files,  mutrates, out_fo
         outfile = os.path.join(out_folder , filename_start + ".decoded.txt")
         #new_df = decode_hmm(infile, outp_train_pair[1], mutrates, outfile, window_size=1000, haploid=False, weights=None)
         intermed = decode_hmm(infile, outp_train_pair[1], mutrates, outfile, window_size=1000, haploid=False, weights=None)
-        new_df = decode_to_df(outfile)
+        new_df = decode_to_df(outfile, haploid=False)
         new_df["sample"] = outp_train_pair[0]
         all_segments.append(new_df)
     return pd.concat(all_segments)
