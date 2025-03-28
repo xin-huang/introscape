@@ -326,89 +326,55 @@ def train_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weight
 #-----------------------------------------------------------------------------------------------------------------------
 # hybrid=-1, viterbi=False => use default posterior decoding algorithm
 # fails after pickle.dump step -> split fn here
-def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weights=None, hybrid=-1, viterbi=False):
-        try:
-            obs, chroms, starts, variants, mutrates, weights  = Load_observations_weights_mutrates(obs, weights, mutrates, window_size, haploid)
-            hmm_parameters = read_HMM_parameters_from_file(param)
-            CHROMOSOME_BREAKPOINTS = [x for x in find_runs(chroms)]
-            print('-' * 40)
-            print(hmm_parameters)
-            print('> number of windows:', len(obs), '. Number of snps = ', sum(obs))
-            print('> total callability:', round(np.sum(weights) / len(obs),2) )
-            print('> average mutation rate per bin:', round(np.sum(mutrates * weights) / np.sum(weights), 2) )
-            print('> Output prefix is',out)
-            print('> Window size is',window_size, 'bp')
-            print('> Haploid',haploid)
-            print('-' * 40)
-            # find segments
-            emissions = Emission_probs_poisson(hmm_parameters.emissions, obs, weights, mutrates)
-            posterior_probs = Calculate_Posterior_probabillities(emissions, hmm_parameters)
-            print('check emissions',emissions)
-            print('check posteriorprob',posterior_probs)
-            if hybrid != -1:
-                if 0 <= hybrid <= 1:
-                    print(f'> Decode using hybrid algorithm with parameter: {hybrid}')
-                    print('-' * 40)
-                    logged_posterior_probs = np.log(posterior_probs.T)
-                    path = Hybrid_path(emissions, hmm_parameters.starting_probabilities, hmm_parameters.transitions, logged_posterior_probs, hybrid)
-                else:
-                    sys.exit('\n\nERROR! Hybrid parameter must be between 0 and 1\n\n')
-            else:
-                if viterbi:
-                    print('> Decode using viterbi algorithm')
-                    print('-' * 40)
-                    path = Viterbi_path(emissions, hmm_parameters)
-                else:
-                    print('> Decode with posterior decoding')
-                    print('-' * 40)
-                    path = PMAP_path(posterior_probs)
-            Write_posterior_probs(chroms, starts, weights, mutrates, posterior_probs, path, variants, hmm_parameters, out)
-            segments = Convert_genome_coordinates(window_size, CHROMOSOME_BREAKPOINTS, starts, variants, posterior_probs, path, hmm_parameters, weights, mutrates, obs)
-            print('check path',path)
-            print('check segments', segments)
-            with open(f"{out}.test", "wb") as f:
-                pickle.dump((emissions, posterior_probs, segments, obs), f)
-            return segments
-        except Exception as e:
-            print("decoding of model failed -", e)
+#def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weights=None, hybrid=-1, viterbi=False):
+#        try:
+#            obs, chroms, starts, variants, mutrates, weights  = Load_observations_weights_mutrates(obs, weights, mutrates, window_size, haploid)
+#            hmm_parameters = read_HMM_parameters_from_file(param)
+#            CHROMOSOME_BREAKPOINTS = [x for x in find_runs(chroms)]
+#            print('-' * 40)
+#            print(hmm_parameters)
+#            print('> number of windows:', len(obs), '. Number of snps = ', sum(obs))
+#            print('> total callability:', round(np.sum(weights) / len(obs),2) )
+#            print('> average mutation rate per bin:', round(np.sum(mutrates * weights) / np.sum(weights), 2) )
+#            print('> Output prefix is',out)
+#            print('> Window size is',window_size, 'bp')
+#            print('> Haploid',haploid)
+#            print('-' * 40)
+#            # find segments
+#            emissions = Emission_probs_poisson(hmm_parameters.emissions, obs, weights, mutrates)
+#            posterior_probs = Calculate_Posterior_probabillities(emissions, hmm_parameters)
+#            print('check emissions',emissions)
+#            print('check posteriorprob',posterior_probs)
+#            if hybrid != -1:
+#                if 0 <= hybrid <= 1:
+#                    print(f'> Decode using hybrid algorithm with parameter: {hybrid}')
+#                    print('-' * 40)
+#                    logged_posterior_probs = np.log(posterior_probs.T)
+#                    path = Hybrid_path(emissions, hmm_parameters.starting_probabilities, hmm_parameters.transitions, logged_posterior_probs, hybrid)
+#                else:
+#                    sys.exit('\n\nERROR! Hybrid parameter must be between 0 and 1\n\n')
+#            else:
+#                if viterbi:
+#                    print('> Decode using viterbi algorithm')
+#                    print('-' * 40)
+#                    path = Viterbi_path(emissions, hmm_parameters)
+#                else:
+#                    print('> Decode with posterior decoding')
+#                    print('-' * 40)
+#                    path = PMAP_path(posterior_probs)
+#            Write_posterior_probs(chroms, starts, weights, mutrates, posterior_probs, path, variants, hmm_parameters, out)
+#            segments = Convert_genome_coordinates(window_size, CHROMOSOME_BREAKPOINTS, starts, variants, posterior_probs, path, hmm_parameters, weights, mutrates, obs)
+#            print('check path',path)
+#            print('check segments', segments)
+#            with open(f"{out}.test", "wb") as f:
+#                pickle.dump((emissions, posterior_probs, segments, obs), f)
+#            return segments
+#        except Exception as e:
+#            print("decoding of model failed -", e)
 
 
 # fails after pickle.dump step -> split fn here
 # may be best to output obs as part of pickle dump => don't need to run fn load_observations.. again
-
-#def decode_to_df(out, haploid=False):
-#    with open(f"{out}.test", "rb") as f:
-#        intermed_outp = pickle.load(f)
-#        
-#    segments=intermed_outp[2]
-#    obs=intermed_outp[3]
-#    Write_Decoded_output(out, segments, obs, None, False)
-#    if haploid:
-#        segments_df = pd.read_table(out + ".haploid.txt")
-#    else:
-#        segments_df = pd.read_table(out + ".diploid.txt")
-#    return segments_df
-#IndentationError: unexpected unindent
-
-#def decode_to_df(out, haploid=False):
-#        try:
-#            with open(f"{out}.test", "rb") as f:
-#                intermed_outp = pickle.load(f)
-#
-#            segments = intermed_outp[2]
-#            obs = intermed_outp[3]
-#            Write_Decoded_output(out, segments, obs, None, False)
-#
-#            if haploid:
-#                segments_df = pd.read_table(out + ".haploid.txt")
-#            else:
-#                segments_df = pd.read_table(out + ".diploid.txt")
-#
-#            return segments_df
-#        except Exception as e:
-#            print(f"decode_to_df failed: {e}")
-#IndentationError: unexpected unindent
-
 
 def decode_to_df(out, haploid=False):
     with open(f"{out}.test", "rb") as f:
@@ -421,6 +387,9 @@ def decode_to_df(out, haploid=False):
     else:
         segments_df = pd.read_table(out + ".diploid.txt")
     return segments_df
+
+# this section runs, but simplify below to avoid pickle dump/load intermed files
+#-----------------------------------------------------------------------------------------------------------------------
 
 def test_Write_Decoded_output(outputprefix, segments, obs_file = None):
     try:
@@ -464,6 +433,61 @@ def Make_folder_if_not_exists(path):
         if not os.path.exists(path):
             os.makedirs(path)
 
+#-----------------------------------------------------------------------------------------------------------------------
+# simplify code
+def decode_hmm(obs, param, mutrates, out, window_size=1000, haploid=False, weights=None, hybrid=-1, viterbi=False):
+        try:
+            obs, chroms, starts, variants, mutrates, weights  = Load_observations_weights_mutrates(obs, weights, mutrates, window_size, haploid)
+            hmm_parameters = read_HMM_parameters_from_file(param)
+            CHROMOSOME_BREAKPOINTS = [x for x in find_runs(chroms)]
+            print('-' * 40)
+            print(hmm_parameters)
+            print('> number of windows:', len(obs), '. Number of snps = ', sum(obs))
+            print('> total callability:', round(np.sum(weights) / len(obs),2) )
+            print('> average mutation rate per bin:', round(np.sum(mutrates * weights) / np.sum(weights), 2) )
+            print('> Output prefix is',out)
+            print('> Window size is',window_size, 'bp')
+            print('> Haploid',haploid)
+            print('-' * 40)
+            # find segments
+            emissions = Emission_probs_poisson(hmm_parameters.emissions, obs, weights, mutrates)
+            posterior_probs = Calculate_Posterior_probabillities(emissions, hmm_parameters)
+            print('check emissions',emissions)
+            print('check posteriorprob',posterior_probs)
+            if hybrid != -1:
+                if 0 <= hybrid <= 1:
+                    print(f'> Decode using hybrid algorithm with parameter: {hybrid}')
+                    print('-' * 40)
+                    logged_posterior_probs = np.log(posterior_probs.T)
+                    path = Hybrid_path(emissions, hmm_parameters.starting_probabilities, hmm_parameters.transitions, logged_posterior_probs, hybrid)
+                else:
+                    sys.exit('\n\nERROR! Hybrid parameter must be between 0 and 1\n\n')
+            else:
+                if viterbi:
+                    print('> Decode using viterbi algorithm')
+                    print('-' * 40)
+                    path = Viterbi_path(emissions, hmm_parameters)
+                else:
+                    print('> Decode with posterior decoding')
+                    print('-' * 40)
+                    path = PMAP_path(posterior_probs)
+            Write_posterior_probs(chroms, starts, weights, mutrates, posterior_probs, path, variants, hmm_parameters, out)
+            segments = Convert_genome_coordinates(window_size, CHROMOSOME_BREAKPOINTS, starts, variants, posterior_probs, path, hmm_parameters, weights, mutrates, obs)
+            print('check path',path)
+            print('check segments', segments)
+            #with open(f"{out}.test", "wb") as f:
+            #    pickle.dump((emissions, posterior_probs, segments, obs), f)
+            #return segments
+            test_Write_Decoded_output(out, segments, obs)
+            if haploid:
+                segments_df = pd.read_table(out + ".haploid.txt")
+            else:
+                segments_df = pd.read_table(out + ".diploid.txt")
+            print('check segments df',segments_df)
+            return segments_df
+        except Exception as e:
+            print("decoding of model failed -", e)
+
 # w/in fn def decode_hmm_individuals - calls decode_hmm fn => add in call to decode_to_df 
 def decode_hmm_individuals(comma_separated_tgt, trained_files,  mutrates, out_folder="", window_size=1000, haploid=False, weights=None):
     all_segments = []
@@ -472,9 +496,9 @@ def decode_hmm_individuals(comma_separated_tgt, trained_files,  mutrates, out_fo
         filename_start = f"output_tgt_vs.{str(outp_train_pair[0])}"
         infile = os.path.join(out_folder , filename_start +  ".txt")
         outfile = os.path.join(out_folder , filename_start + ".decoded.txt")
-        #new_df = decode_hmm(infile, outp_train_pair[1], mutrates, outfile, window_size=1000, haploid=False, weights=None)
-        intermed = decode_hmm(infile, outp_train_pair[1], mutrates, outfile, window_size=1000, haploid=False, weights=None)
-        new_df = decode_to_df(outfile, haploid=False)
+        new_df = decode_hmm(infile, outp_train_pair[1], mutrates, outfile, window_size=1000, haploid=False, weights=None)
+        #intermed = decode_hmm(infile, outp_train_pair[1], mutrates, outfile, window_size=1000, haploid=False, weights=None)
+        #new_df = decode_to_df(outfile, haploid=False)
         new_df["sample"] = outp_train_pair[0]
         all_segments.append(new_df)
     return pd.concat(all_segments)
