@@ -415,13 +415,54 @@ def decode_to_df(out, haploid=False):
         intermed_outp = pickle.load(f)
     segments = intermed_outp[2]
     obs = intermed_outp[3]
-    Write_Decoded_output(out, segments, obs, None, False)
+    test_Write_Decoded_output(out, segments, obs)
     if haploid:
         segments_df = pd.read_table(out + ".haploid.txt")
     else:
         segments_df = pd.read_table(out + ".diploid.txt")
     return segments_df
 
+def test_Write_Decoded_output(outputprefix, segments, obs_file = None):
+    try:
+        # check ploidity
+        outfile_mapper = {}
+        for _, _, _, _, _, _, _, ploidity, _, _, _ in segments:
+            if outputprefix == '/dev/stdout':
+                outfile_mapper[ploidity] = '/dev/stdout'
+            else:
+                outfile_mapper[ploidity] = f'{outputprefix}.{ploidity}.txt'
+
+        # Create output files
+        outputfiles_handlers = {}
+        for ploidity, output in outfile_mapper.items():
+            Make_folder_if_not_exists(output)
+            outputfiles_handlers[ploidity] = open(output, 'w')
+            out = outputfiles_handlers[ploidity]
+
+            # Write headers
+            out.write('chrom\tstart\tend\tlength\tstate\tmean_prob\tsnps\n')
+
+        # Process and write each segment to the appropriate output file
+        for chrom, genome_start, genome_end, genome_length, state, mean_prob, snp_counter, ploidity, _, _, _ in segments:
+            out = outputfiles_handlers[ploidity]
+            print(chrom, genome_start, genome_end, genome_length, state, mean_prob, snp_counter, sep='\t', file=out)
+    
+    except Exception as e:
+        print(f"writing decoded output failed: {e}")
+    
+    finally:
+        # Close all output file handlers
+        for out in outputfiles_handlers.values():
+            out.close()
+
+def Make_folder_if_not_exists(path):
+    '''
+    Check if path exists - otherwise make it;
+    '''
+    path = os.path.dirname(path)
+    if path != '':
+        if not os.path.exists(path):
+            os.makedirs(path)
 
 # w/in fn def decode_hmm_individuals - calls decode_hmm fn => add in call to decode_to_df 
 def decode_hmm_individuals(comma_separated_tgt, trained_files,  mutrates, out_folder="", window_size=1000, haploid=False, weights=None):
