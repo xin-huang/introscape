@@ -1,0 +1,12 @@
+# need to amend rule all to final outputs ** 
+# ie the introgressed fragments, plots
+rule all:
+    input:
+        "results/introgressedfragments",
+
+# need to add flag which version of skov scripts to checkout to **
+include: "rules/commons/install_external_tools.smk"
+include: "workflows/simulate_msprime.smk"
+include: "workflows/sstar.smk"
+include: "workflows/SPrime.smk"
+include: "workflows/hmmix.smk"
