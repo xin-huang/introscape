@@ -1,5 +1,10 @@
-logs/*
-results*
-.snakemake/*
-submit.sh
+.snakemake
+*.gz
 *.out
+*.sh
+examples*
+logs
+logs_slurm
+resources*
+results*
+*__pycache__*
