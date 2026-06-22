@@ -1,0 +1,111 @@
+// Copyright 2025 Xin Huang
+//
+// GNU General Public License v3.0
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, please see
+//
+//    https://www.gnu.org/licenses/gpl-3.0.en.html
+
+function (integer) nextSeed(void) {
+    base = sim.getValue("seed0");
+    i    = sim.getValue("reseed_n") + 1;
+    new  = asInteger((base + i * 1315423911) % asInteger(2^62));
+    sim.setValue("reseed_n", i);
+    return new;
+}
+
+initialize() {
+    initializeMutationRate(1.5e-8);
+    initializeMutationType("m1", 0.5, "f", 0.0);
+    initializeMutationType("m2", 0.5, "f", s);
+    initializeGenomicElementType("g1", m1, 1.0);
+    initializeGenomicElement(g1, 0, 39999);
+    initializeRecombinationRate(1e-8);
+}
+
+
+1 early() {
+    sim.setValue("seed0", getSeed());
+    sim.setValue("reseed_n", 0);
+    sim.setValue("ckpt", tempdir() + "before_selection." + getSeed() + ".txt");
+    sim.addSubpop("p1", 10000); 
+}
+
+200001 early() {
+    sim.addSubpopSplit("p2", 10000, p1);
+}
+
+201000 late() {
+    sim.outputFull(sim.getValue("ckpt"));    
+    target = sample(p1.genomes, 1);
+    target.addNewDrawnMutation(m2, 19999);
+}
+
+201000:214400 late() {
+    mut = sim.mutationsOfType(m2);
+    if (size(mut) == 0) {
+        cat(getSeed() + ": The beneficial allele is LOST in the source population – RESTARTING\n");
+        sim.readFromPopulationFile(sim.getValue("ckpt"));
+        setSeed(nextSeed());
+        target = sample(p1.genomes, 1);
+        target.addNewDrawnMutation(m2, 19999);
+    }
+}
+
+214400 late() {
+    mut = sim.mutationsOfType(m2);
+    mut_frq = sim.mutationFrequencies(p1, mut);
+    if (size(mut) != 0) {
+        if (mut_frq != 1.0) {
+            cat(getSeed() + ": The beneficial allele is NOT FIXED in the source population – RESTARTING\n");
+            sim.readFromPopulationFile(sim.getValue("ckpt"));
+            setSeed(nextSeed());
+            target = sample(p1.genomes, 1);
+            target.addNewDrawnMutation(m2, 19999);
+        }
+    }
+}
+
+212001 early() {
+    sim.addSubpopSplit("p3", 10000, p2);
+}
+
+214401 early() {
+    p2.setMigrationRates(p1, 0.02);
+}
+
+214401 late() {
+    nMig = sum(p2.individuals.migrant);
+    cat("migrant offspring in p2 this gen: " + nMig + "\n");
+    if (nMig == 0) {
+        cat(getSeed() + ": No migrant offspring in p2 from p1 – RESTARTING\n");
+        sim.readFromPopulationFile(sim.getValue("ckpt"));
+        setSeed(nextSeed());
+        target = sample(p1.genomes, 1);
+        target.addNewDrawnMutation(m2, 19999);
+    }
+}
+
+214402 early() {
+    p2.setMigrationRates(p1, 0);
+}
+
+214500 late() {
+    p1.outputVCFSample(1); // Source
+}
+
+216000 late() { 
+    p2.outputVCFSample(503); // Target
+    p3.outputVCFSample(1008); // Reference
+}

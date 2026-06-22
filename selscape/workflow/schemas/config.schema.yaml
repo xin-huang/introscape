@@ -1,0 +1,55 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+description: "Main configuration for selscape pipeline"
+
+type: object
+additionalProperties: false
+
+properties:
+  datasets:
+    type: array
+    items:
+      type: string
+    minItems: 1
+    description: "List of paths to dataset config files"
+
+  betascan_config:
+    type: string
+    description: "Path to BetaScan configuration file"
+
+  selscan_config:
+    type: string
+    description: "Path to selscan configuration file"
+
+  dadi_config:
+    type: string
+    description: "Path to dadi-cli configuration file"
+
+  scikit_allel_config:
+    type: string
+    description: "Path to scikit-allel configuration file"
+
+  population_groups:
+    type: object
+    description: "Optional: group populations by color for combined DFE plot"
+    additionalProperties:
+      type: object
+      properties:
+        color:
+          type: string
+          description: "Color for this group"
+        populations:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          description: "List of population IDs in this group"
+      required:
+        - color
+        - populations
+
+required:
+  - datasets
+  - selscan_config
+  - betascan_config
+  - dadi_config
+  - scikit_allel_config

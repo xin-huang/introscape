@@ -1,0 +1,109 @@
+# Copyright 2026 Xin Huang and Andrea Koca
+#
+# GNU General Public License v3.0
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, please see
+#
+#    https://www.gnu.org/licenses/gpl-3.0.en.html
+
+
+from dataclasses import dataclass
+
+import numpy as np
+
+
+TRAINING_REP = 1000
+TEST_REP = 10
+DEMOGRAPHIC_MODELS = [
+    "ArchIE_3D19",
+    "HumanNeanderthal_4G21",
+    "BonoboGhost_4K19",
+]
+PHASE_STATES = ["phased", "unphased"]
+N_REFS = [50]
+N_TGTS = [50]
+N_SRCS = [0]
+TEST_LENGTH_BP = 200_000_000
+
+
+@dataclass(frozen=True)
+class PopConfig:
+    ref: str
+    tgt: str
+    src: str
+    mut_rate: float
+    rec_rate: float
+    win_len: int
+
+
+POP_CONFIGS = {
+    "ArchIE_3D19": PopConfig(
+        ref="Reference",
+        tgt="Target",
+        src="Source",
+        mut_rate=1.25e-8,
+        rec_rate=1.0e-8,
+        win_len=50_000,
+    ),
+    "HumanNeanderthal_4G21": PopConfig(
+        ref="YRI",
+        tgt="CEU",
+        src="Nea",
+        mut_rate=1.29e-8,
+        rec_rate=1.0e-8,
+        win_len=50_000,
+    ),
+    "BonoboGhost_4K19": PopConfig(
+        ref="Western",
+        tgt="Bonobo",
+        src="Ghost",
+        mut_rate=1.2e-8,
+        rec_rate=0.7e-8,
+        win_len=40_000,
+    ),
+}
+
+rng = np.random.default_rng(3821)
+all_seeds = rng.choice(
+    2**31 - 1,
+    size=TEST_REP * TRAINING_REP + TEST_REP,
+    replace=False
+) + 1
+training_seed_list = all_seeds[:TEST_REP * TRAINING_REP].reshape(TEST_REP, TRAINING_REP).tolist()
+test_seed_list = all_seeds[TEST_REP * TRAINING_REP:].tolist()
+seed_lists = {
+    "training": training_seed_list,
+    "test": test_seed_list,
+}
+
+cutoffs = np.arange(0.1, 1.0, 0.1).round(1)
+cutoffs = np.concatenate([np.array([0.001, 0.01]), cutoffs, np.array([0.99, 0.999, 0.9999, 0.99999])])
+
+
+rule all:
+    input:
+        expand(
+            "results/plots/pred.nref_{n_ref}.ntgt_{n_tgt}.nsrc_{n_src}.pr.curve.combined.png",
+            n_ref=N_REFS,
+            n_tgt=N_TGTS,
+            n_src=N_SRCS,
+        )
+
+
+include: "rules/common.smk"
+include: "rules/simulation.smk"
+include: "rules/sstar.smk"
+include: "rules/sstar2.smk"
+include: "rules/qr.smk"
+include: "rules/performance.smk"

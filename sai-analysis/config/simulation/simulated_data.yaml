@@ -1,0 +1,33 @@
+statistics:
+  DD: {}
+  Danc: {}
+  Dplus: {}
+  df: {}
+  fd: {}
+  U:
+    ref:
+      REF: 0.01
+    tgt:
+      TGT: 0.5
+    src:
+      SRC: "=1"
+  Q:
+    ref:
+      REF: 0.01
+    tgt:
+      TGT: 0.95
+    src:
+      SRC: "=1"
+
+ploidies:
+  ref:
+    REF: 2
+  tgt:
+    TGT: 2
+  src:
+    SRC: 2
+
+populations:
+  ref: "config/simulation/simulated.ref.samples.txt"
+  tgt: "config/simulation/simulated.tgt.samples.txt"
+  src: "config/simulation/simulated.src.samples.txt"

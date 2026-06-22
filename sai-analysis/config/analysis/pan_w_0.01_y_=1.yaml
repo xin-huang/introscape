@@ -1,0 +1,33 @@
+statistics:
+  DD: {}
+  Danc: {}
+  Dplus: {}
+  df: {}
+  fd: {}
+  U:
+    ref:
+      PTV: 0.01
+    tgt:
+      PTT: 0.9
+    src:
+      PPA: "=1"
+  Q:
+    ref:
+      PTV: 0.01
+    tgt:
+      PTT: 0.95
+    src:
+      PPA: "=1"
+
+ploidies:
+  ref:
+    PTV: 2
+  tgt:
+    PTT: 2
+  src:
+    PPA: 2
+
+populations:
+  ref: "results/processed_data/pan/samples/pan.ref.samples.txt"
+  tgt: "results/processed_data/pan/samples/pan.tgt.samples.txt"
+  src: "results/processed_data/pan/samples/pan.src.samples.txt"
