@@ -37,8 +37,8 @@ Do not assume the workflow layout before reading the actual files.
 - Do not put runtime-specific settings such as threads, resources, or output directories into config files unless the existing workflow already does so.
 - Do not silently change wildcard behavior.
 - When editing rules, check that target expansion and wildcards still resolve correctly.
-- Do not use inline `lambda` functions in Snakemake rules.
-- Do not use Snakemake checkpoints.
+- Do not use inline `lambda` functions in Snakemake rules. [Snakemake best practices](https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html#care-about-code-readability) **explicitly** recommend avoiding `lambda` expressions inside rules and moving helper logic into named functions or scripts. Inline `lambda` logic makes rules harder to read, test, debug, and modify safely.
+- Do not use Snakemake checkpoints unless explicitly requested. Checkpoints create data-dependent dynamic DAGs and make dry-runs, CI, wildcard resolution, and reruns harder to reason about. Use regular explicit rules whenever the workflow structure can be known before execution.
 - When using `expand()` with patterns that intentionally keep some wildcards unresolved, use `allow_missing=True`.
 - Do not add `conda: ../envs/env.yaml` or another shared main environment to rules that only use dependencies from the main workflow environment.
 - Add `conda:` only for rules that require a dedicated environment.
