@@ -1,0 +1,17 @@
+# Minimal CI configuration for the top-level introscape workflow.
+
+datasets:
+  - .tests/ci/config/datasets/ci_test.yaml
+
+methods:
+  sstar2: .tests/ci/config/methods/sstar2.yaml
+
+analyses:
+  - id: ci_yri_chs
+    dataset: ci_test
+    ref_population: YRI
+    tgt_population: CHS
+    src_population: null
+    methods:
+      - sstar2
+    demes: .tests/ci/config/demography/HumanNeanderthal_4G21_wo_introgression.yaml
