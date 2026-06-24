@@ -1,106 +1,102 @@
-# Introscape v1 Workflow Reorganization Plan
+# Introscape v1 SSTAR2 Workflow Plan
 
 ## Summary
 
-Build a new top-level `introscape` Snakemake workflow using `selscape` only as the structural template. Do not modify `selscape/`, `sai-analysis/`, or `sstar-qr-analysis/`. Remove the existing top-level GITA/LR-oriented `workflow/` and `config/` content, then replace it with a standard Snakemake project that runs `sai` and `sstar2` as first-version introgression analysis methods.
+Reorganize the top-level `introscape` repository into a standard Snakemake workflow project, using `selscape` only as a structural and style reference. Do not modify `selscape/`, `sai-analysis/`, or `sstar-qr-analysis/`.
 
-The v1 workflow targets real dataset analysis, not simulation benchmarking. Inputs are `selscape`-style dataset configs plus explicit `ref/tgt/src` analysis definitions. Outputs are candidate regions, annotated candidate genes, enrichment tables, enrichment plots, and simple HTML tables. Do not force Manhattan plots in v1.
+Version 1 should implement only the `sstar2` workflow. `sai` remains a future method module. The goal is to connect a `selscape`-style upstream data/config layer to an `sstar2` method layer and a lightweight downstream layer that reports candidate regions and candidate genes.
+
+The existing top-level GITA/LR/UNet workflow and old simulation-oriented configs should be removed during implementation and replaced with the new `introscape` structure.
 
 ## Key Changes
 
-- Create a standard top-level workflow layout:
+- Build a top-level Snakemake workflow:
   - `workflow/Snakefile`
   - `workflow/rules/common.smk`
   - `workflow/rules/preprocess.smk`
-  - `workflow/rules/sai.smk`
   - `workflow/rules/sstar2.smk`
   - `workflow/rules/annotation.smk`
-  - `workflow/rules/enrichment.smk`
   - `workflow/rules/report.smk`
   - `workflow/scripts/`
   - `workflow/envs/`
   - `workflow/schemas/`
 
-- Replace old top-level files:
-  - Delete old GITA/LR and empty UNet rules.
-  - Delete old top-level GITA simulation scripts and plotting scripts.
-  - Delete old `config/scenarios`, `config/features`, and `config/demog`.
-  - Recreate `config/` around the new `main + datasets + methods` layout.
+- Rebuild configuration around the `selscape` pattern:
+  - `config/main.yaml`
+  - `config/datasets/example.yaml`
+  - `config/methods/sstar2.yaml`
+  - explicit analysis units in `main.yaml`
 
-- Keep external reference projects untouched:
-  - `selscape/` remains read-only reference for workflow organization, preprocessing, annotation, enrichment, and report conventions.
-  - `sai-analysis/` remains read-only reference for `sai score`, `sai outlier`, and 1-source config shape.
-  - `sstar-qr-analysis/` remains read-only reference for `sstar2 train`, config rendering, and `sstar2 infer`.
+- Keep reference projects untouched:
+  - `selscape/` is only the workflow layout and upstream/downstream template.
+  - `sstar-qr-analysis/` is only the reference for `sstar2 train`, config rendering, and `sstar2 infer`.
+  - `sai-analysis/` is not part of v1 implementation.
 
 ## Workflow Design
 
-- Main config:
-  - `config/main.yaml` lists dataset config files, method config files, and explicit analysis units.
-  - Each analysis unit has an ID, dataset ID, ref population, tgt population, src population, enabled methods, and method-specific overrides where needed.
+- Dataset configs follow the useful parts of `selscape`:
+  - dataset ID, species, reference genome, chromosomes
+  - VCF path pattern
+  - sample metadata
+  - optional ancestral allele BED files
+  - annotation and gene mapping files
 
-- Dataset config:
-  - Follows the useful parts of `selscape` dataset schema: dataset, species, ref genome, VCF folder/prefix/suffix, metadata, chromosomes, genome annotation, gene2go, repeats, ancestral alleles, ploidy.
-  - Metadata format is `Sample` + `Population`; all ref/tgt/src populations must exist in the same multisample VCF for v1.
+- `main.yaml` defines analysis units explicitly:
+  - analysis ID
+  - dataset ID
+  - ref, tgt, and src populations
+  - enabled method list, with `sstar2` enabled for v1
+  - demes model path and method-specific overrides
 
-- Preprocessing:
-  - Extract biallelic SNPs per chromosome.
-  - Generate per-analysis sample lists for `ref`, `tgt`, and `src`.
-  - Optionally polarize variants only when ancestral allele config is present.
-  - Produce cleaned VCFs and sample lists in stable `results/processed_data/...` paths.
+- Preprocessing should:
+  - extract biallelic SNPs per chromosome
+  - generate ref/tgt/src sample lists from metadata
+  - optionally polarize variants if ancestral allele data is configured
+  - produce stable `results/processed_data/...` inputs for `sstar2`
 
-- SAI method:
-  - Implement v1 as generic 1-source analysis.
-  - Generate a `sai` config per analysis unit from ref/tgt/src sample lists and method config.
-  - Run `sai score` per chromosome/window.
-  - Merge scores and run `sai outlier`.
-  - Convert SAI outlier windows into the unified candidate-region table.
+- `sstar2` should:
+  - render one config per analysis unit
+  - train an ONNX model from the configured demes model
+  - run inference on the processed analysis VCF
+  - convert inferred tract BED output into a unified candidate-region table
 
-- SSTAR2 method:
-  - Render an `sstar2` config per analysis unit from method config, demes path, sample lists, window settings, phase setting, and training parameters.
-  - Train ONNX model from configured demes.
-  - Run `sstar2 infer` on the analysis VCF.
-  - Convert inferred tract BED into the unified candidate-region table.
-  - Do not create artificial Manhattan scores for SSTAR2 in v1.
+- Downstream v1 should:
+  - use candidate regions as the common output object
+  - annotate candidate regions to genes
+  - write candidate region TSV, candidate gene TSV, and candidate gene HTML
+  - not force Manhattan plots in v1
+  - keep enrichment as a later extension unless the minimal fixture supports it cleanly
 
-- Unified downstream:
-  - Candidate-region table columns: `method`, `analysis`, `dataset`, `chrom`, `start`, `end`, plus method-specific metadata columns.
-  - Annotate candidate regions against ANNOVAR-style multianno outputs or an equivalent derived annotation table.
-  - Produce candidate SNP/region lists, candidate gene tables, enrichment input files, GOWINDA enrichment TSVs, enrichment plots, and HTML tables.
-  - `rule all` targets candidate region tables, candidate gene HTML/TSV, enrichment TSV/PNG/HTML for every enabled method and analysis unit.
+## Test Data And CI
 
-## Interfaces
+- Use upstream `xin-huang/selscape` GitHub test fixtures as the source for test data, not the local vendored `selscape/` directory.
+- Copy or otherwise vendor the upstream `.tests/ci/data` fixture files into the top-level `introscape` test area during implementation:
+  - `chr21.hg19.test.vcf.gz`
+  - `test.21.bed.gz`
+  - `test.gene2go.gz`
+  - `test.gtf.gz`
+  - `test_metadata.txt`
 
-- Add dedicated environments:
-  - `workflow/envs/sai.yaml` based on `sai-analysis` dependencies, with `sai-pg`.
-  - `workflow/envs/sstar2.yaml` based on `sstar-qr-analysis`, with `sstar2` dependencies.
-  - `workflow/envs/introscape.yaml` for shared preprocessing, annotation, plotting, and Snakemake-side scripts.
-
-- Add schemas:
-  - `workflow/schemas/config.schema.yaml`
-  - `workflow/schemas/dataset.schema.yaml`
-  - `workflow/schemas/sai.schema.yaml`
-  - `workflow/schemas/sstar2.schema.yaml`
-
-- Add example configs:
-  - `config/main.yaml`
-  - `config/datasets/example.yaml`
-  - `config/methods/sai.yaml`
-  - `config/methods/sstar2.yaml`
+- Create a top-level `.tests/ci/config` modeled after upstream `selscape` CI config, adapted for `introscape` and `sstar2`.
+- Add the extra minimal files needed by `sstar2`, especially a tiny demes model and method config.
+- CI/test commands should start with dry-run validation and then run the smallest feasible real target up to candidate-region conversion.
 
 ## Test Plan
 
-- Run `snakemake -n -p --configfile config/main.yaml` from the repository root.
-- Run `snakemake --lint` if supported by the installed Snakemake version.
-- Run `snakefmt --check .` if `snakefmt` is available.
-- Run focused unit-style checks for Python adapter scripts with small artificial TSV/BED inputs.
-- Verify no changes occur under `selscape/`, `sai-analysis/`, or `sstar-qr-analysis/`.
-- Verify `git diff` before finalizing implementation.
+- Run:
+  - `snakemake -n -p --configfile .tests/ci/config/main.yaml`
+  - `snakemake --lint`, if available
+  - `snakefmt --check .`, if available
+
+- Add focused tests for adapter scripts using tiny BED/TSV inputs.
+- If the `sstar2` environment resolves locally, run the smallest real workflow target through candidate-region conversion.
+- Verify no files under `selscape/`, `sai-analysis/`, or `sstar-qr-analysis/` are modified.
+- Show `git status` and `git diff` before finalizing implementation.
 
 ## Assumptions
 
-- First version analyzes real multisample VCF datasets, not simulated benchmark scenarios.
-- Each configured `ref`, `tgt`, and `src` population is present in the dataset metadata and VCF.
-- SAI v1 supports only generic 1-source mode.
-- SSTAR2 v1 always trains from configured demes before inference.
-- Manhattan plots are out of scope for v1; enrichment plots and HTML/TSV tables are in scope.
-- Existing top-level GITA/LR workflow and config content should be removed during implementation.
+- v1 is `sstar2` only.
+- `sai` is deferred.
+- `selscape` is a template, not an implementation target.
+- Upstream `xin-huang/selscape` is the source of test fixture files.
+- The user will handle commit and push to GitHub after reviewing local changes.
