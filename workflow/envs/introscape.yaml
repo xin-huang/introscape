@@ -1,0 +1,10 @@
+name: introscape
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bcftools
+  - htslib
+  - pandas
+  - python
+  - pyyaml

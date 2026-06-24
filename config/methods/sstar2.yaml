@@ -1,0 +1,31 @@
+simulation:
+  nrep: 10
+  nref: 5
+  ntgt: 10
+  ref_id: YRI
+  tgt_id: CEU
+  seq_len: 50000
+  mut_rate: 1.29e-8
+  rec_rate: 1.0e-8
+  ploidy: 2
+  is_phased: false
+  nfeature: 1000
+  is_shuffled: false
+  nprocess: 1
+  seed: 12345
+
+preprocessing:
+  chr_name: "21"
+  win_len: 50000
+  win_step: 50000
+  is_phased: false
+  nprocess: 1
+  ploidy: 2
+
+model:
+  params:
+    loss: quantile
+    alpha: 0.95
+    n_estimators: 10
+    max_depth: 2
+    random_state: 12345

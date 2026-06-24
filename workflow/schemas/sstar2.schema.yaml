@@ -1,0 +1,93 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+description: "sstar2 method configuration"
+
+type: object
+additionalProperties: false
+
+properties:
+  simulation:
+    type: object
+    additionalProperties: false
+    properties:
+      nrep:
+        type: integer
+      nref:
+        type: integer
+      ntgt:
+        type: integer
+      ref_id:
+        type: string
+      tgt_id:
+        type: string
+      seq_len:
+        type: integer
+      mut_rate:
+        type: number
+      rec_rate:
+        type: number
+      ploidy:
+        type: integer
+      is_phased:
+        type: boolean
+      nfeature:
+        type: integer
+      is_shuffled:
+        type: boolean
+      nprocess:
+        type: integer
+      seed:
+        type: integer
+    required:
+      - nrep
+      - nref
+      - ntgt
+      - ref_id
+      - tgt_id
+      - seq_len
+      - mut_rate
+      - rec_rate
+      - ploidy
+      - is_phased
+      - nfeature
+      - is_shuffled
+      - nprocess
+      - seed
+
+  preprocessing:
+    type: object
+    additionalProperties: false
+    properties:
+      chr_name:
+        type: string
+      win_len:
+        type: integer
+      win_step:
+        type: integer
+      is_phased:
+        type: boolean
+      nprocess:
+        type: integer
+      ploidy:
+        type: integer
+    required:
+      - chr_name
+      - win_len
+      - win_step
+      - is_phased
+      - nprocess
+      - ploidy
+
+  model:
+    type: object
+    additionalProperties: false
+    properties:
+      params:
+        type: object
+        additionalProperties: true
+    required:
+      - params
+
+required:
+  - simulation
+  - preprocessing
+  - model

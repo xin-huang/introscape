@@ -1,0 +1,15 @@
+datasets:
+  - config/datasets/example.yaml
+
+methods:
+  sstar2: config/methods/sstar2.yaml
+
+analyses:
+  - id: example_yri_chs
+    dataset: ci_test
+    ref_population: YRI
+    tgt_population: CHS
+    src_population: null
+    methods:
+      - sstar2
+    demography: config/demography/HumanNeanderthal_4G21_wo_introgression.yaml

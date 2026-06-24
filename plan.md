@@ -46,7 +46,7 @@ The existing top-level GITA/LR/UNet workflow and old simulation-oriented configs
   - dataset ID
   - ref, tgt, and src populations
   - enabled method list, with `sstar2` enabled for v1
-  - demes model path and method-specific overrides
+  - demography model path and method-specific overrides
 
 - Preprocessing should:
   - extract biallelic SNPs per chromosome
@@ -56,7 +56,7 @@ The existing top-level GITA/LR/UNet workflow and old simulation-oriented configs
 
 - `sstar2` should:
   - render one config per analysis unit
-  - train an ONNX model from the configured demes model
+  - train an ONNX model from the configured demography model
   - run inference on the processed analysis VCF
   - convert inferred tract BED output into a unified candidate-region table
 
@@ -78,7 +78,7 @@ The existing top-level GITA/LR/UNet workflow and old simulation-oriented configs
   - `test_metadata.txt`
 
 - Create a top-level `.tests/ci/config` modeled after upstream `selscape` CI config, adapted for `introscape` and `sstar2`.
-- Add the extra minimal files needed by `sstar2`, especially a tiny demes model and method config.
+- Add the extra minimal files needed by `sstar2`, especially a tiny demography model and method config.
 - CI/test commands should start with dry-run validation and then run the smallest feasible real target up to candidate-region conversion.
 
 ## Test Plan

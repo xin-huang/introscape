@@ -1,0 +1,22 @@
+name: introscape-sstar2
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - demes=0.2.3
+  - dask>=2024.12.0
+  - htslib
+  - msprime
+  - numpy
+  - onnx
+  - onnxruntime
+  - pandas
+  - pip
+  - pydantic
+  - python=3.12.13
+  - scikit-allel
+  - scikit-learn
+  - scipy
+  - skl2onnx
+  - pip:
+      - git+https://github.com/xin-huang/sstar.git

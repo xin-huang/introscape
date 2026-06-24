@@ -1,0 +1,55 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+description: "Top-level introscape workflow configuration"
+
+type: object
+additionalProperties: false
+
+properties:
+  datasets:
+    type: array
+    items:
+      type: string
+    minItems: 1
+
+  methods:
+    type: object
+    additionalProperties:
+      type: string
+    minProperties: 1
+
+  analyses:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        dataset:
+          type: string
+        ref_population:
+          type: string
+        tgt_population:
+          type: string
+        src_population:
+          type: ["string", "null"]
+        methods:
+          type: array
+          items:
+            type: string
+          minItems: 1
+        demography:
+          type: string
+      required:
+        - id
+        - dataset
+        - ref_population
+        - tgt_population
+        - methods
+        - demography
+    minItems: 1
+
+required:
+  - datasets
+  - methods
+  - analyses

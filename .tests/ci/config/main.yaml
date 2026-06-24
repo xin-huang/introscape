@@ -14,4 +14,4 @@ analyses:
     src_population: null
     methods:
       - sstar2
-    demes: .tests/ci/config/demography/HumanNeanderthal_4G21_wo_introgression.yaml
+    demography: .tests/ci/config/demography/HumanNeanderthal_4G21_wo_introgression.yaml

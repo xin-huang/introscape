@@ -1,0 +1,81 @@
+$schema: "http://json-schema.org/draft-06/schema#"
+description: "Dataset configuration for introscape"
+
+type: object
+additionalProperties: false
+
+properties:
+  dataset:
+    type: string
+  species:
+    type: string
+  tax_id:
+    type: integer
+  ref_genome:
+    type: string
+  anc_alleles:
+    type: ["object", "null"]
+    additionalProperties: false
+    properties:
+      path:
+        type: string
+      prefix:
+        type: string
+      chr_prefix:
+        type: string
+    required:
+      - path
+      - prefix
+      - chr_prefix
+  genome_annotation:
+    type: string
+  gene2go:
+    type: string
+  hwe_pvalue:
+    type: number
+    minimum: 0.0
+    maximum: 1.0
+  rmsk:
+    type: ["string", "null"]
+  seg_dup:
+    type: ["string", "null"]
+  sim_rep:
+    type: ["string", "null"]
+  ploidy:
+    type: integer
+  populations:
+    type: array
+    items:
+      type: string
+    minItems: 1
+  data_folder:
+    type: string
+  vcf_prefix:
+    type: string
+  vcf_suffix:
+    type: string
+  metadata:
+    type: string
+  chromosomes:
+    type: array
+    items:
+      oneOf:
+        - type: integer
+        - type: string
+    minItems: 1
+
+required:
+  - dataset
+  - species
+  - tax_id
+  - ref_genome
+  - genome_annotation
+  - gene2go
+  - hwe_pvalue
+  - ploidy
+  - populations
+  - data_folder
+  - vcf_prefix
+  - vcf_suffix
+  - metadata
+  - chromosomes

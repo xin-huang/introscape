@@ -22,6 +22,7 @@ Do not assume the workflow layout before reading the actual files.
 - Do not rewrite the workflow structure unless explicitly asked.
 - Do not change scientific assumptions, input formats, output formats, or default parameters unless explicitly asked.
 - Keep code comments and docstrings in English.
+- Use complete copyright and license headers in code and workflow files where headers are used; do not add copyright headers to YAML files.
 - Preserve existing style, naming conventions, and directory layout.
 - Do not add new dependencies unless necessary.
 - Never commit generated outputs, temporary files, benchmark files, logs, or large data files.
@@ -64,6 +65,7 @@ Suggested rule field order:
 - Do not rely on global variables to pass workflow state.
 - All Python functions must use type hints.
 - All Python functions must have NumPy-style docstrings.
+- Python docstrings must put the opening triple double quotes on their own first line, then start the summary on the next line.
 - If a function returns `None`, do not include a `Returns` section in the docstring.
 
 ## Testing and validation

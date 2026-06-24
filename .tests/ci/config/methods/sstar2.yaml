@@ -8,7 +8,7 @@ simulation:
   tgt_id: CEU
   seq_len: 50000
   mut_rate: 1.29e-8
-  rec_rate: 1e-8
+  rec_rate: 1.0e-8
   ploidy: 2
   is_phased: false
   nfeature: 1000

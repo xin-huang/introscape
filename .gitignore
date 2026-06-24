@@ -1,5 +1,6 @@
 .snakemake
 *.gz
+!.tests/ci/data/*.gz
 *.out
 *.sh
 examples*
